@@ -137,9 +137,16 @@
         document.getElementById('numIntervals').removeAttribute('step');
         document.getElementById('numIntervals').value = '8';
       }
+      // Show keyboard by default for integration methods
+      mathKeyboard.style.display = 'block';
+      kbdToggle.classList.add('active');
+      kbdToggle.textContent = '⌨ Hide Keyboard';
     } else {
       integInputs.style.display = 'none';
       interpInputs.style.display = 'block';
+      mathKeyboard.style.display = 'none';
+      kbdToggle.classList.remove('active');
+      kbdToggle.textContent = '⌨ Keyboard';
       generateDataTable(+document.getElementById('numPoints').value || 4);
     }
 
@@ -370,10 +377,10 @@
 
   // Toggle keyboard visibility
   kbdToggle.addEventListener('click', () => {
-    const visible = mathKeyboard.style.display !== 'none';
-    mathKeyboard.style.display = visible ? 'none' : 'block';
-    kbdToggle.classList.toggle('active', !visible);
-    if (!visible) funcInput.focus();
+    const opening = mathKeyboard.style.display === 'none';
+    mathKeyboard.style.display = opening ? 'block' : 'none';
+    kbdToggle.classList.toggle('active', opening);
+    kbdToggle.textContent = opening ? '⌨ Hide Keyboard' : '⌨ Keyboard';
   });
 
   // Insert text at cursor; if text ends with '(' auto-close and place cursor inside
