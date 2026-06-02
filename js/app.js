@@ -30,6 +30,8 @@
   const printResultBtn = document.getElementById('printResultBtn');
   const printBtn       = document.getElementById('printBtn');
   const exportPdfBtn   = document.getElementById('exportPdfBtn');
+  const kbdToggle      = document.getElementById('kbdToggle');
+  const mathKeyboard   = document.getElementById('mathKeyboard');
 
   // Input containers
   const integInputs    = document.getElementById('integrationInputs');
@@ -362,5 +364,63 @@
 
   // ---- Keyboard shortcut hint ----
   calcBtn.title = 'Calculate (Ctrl+Enter)';
+
+  // ---- Math Keyboard ----
+  const funcInput = document.getElementById('funcInput');
+
+  // Toggle keyboard visibility
+  kbdToggle.addEventListener('click', () => {
+    const visible = mathKeyboard.style.display !== 'none';
+    mathKeyboard.style.display = visible ? 'none' : 'block';
+    kbdToggle.classList.toggle('active', !visible);
+    if (!visible) funcInput.focus();
+  });
+
+  // Insert text at cursor; if text ends with '(' auto-close and place cursor inside
+  function insertAtCursor(text) {
+    funcInput.focus();
+    const start = funcInput.selectionStart;
+    const end   = funcInput.selectionEnd;
+    const val   = funcInput.value;
+
+    if (text.endsWith('(')) {
+      // Insert "fn()" and place cursor between the parens
+      const full = text + ')';
+      funcInput.value = val.slice(0, start) + full + val.slice(end);
+      funcInput.setSelectionRange(start + text.length, start + text.length);
+    } else {
+      funcInput.value = val.slice(0, start) + text + val.slice(end);
+      funcInput.setSelectionRange(start + text.length, start + text.length);
+    }
+  }
+
+  // Keyboard button clicks
+  mathKeyboard.addEventListener('click', e => {
+    const btn = e.target.closest('.kbd-btn');
+    if (!btn) return;
+
+    if (btn.id === 'kbdBackspace') {
+      const start = funcInput.selectionStart;
+      const end   = funcInput.selectionEnd;
+      if (start !== end) {
+        funcInput.value = funcInput.value.slice(0, start) + funcInput.value.slice(end);
+        funcInput.setSelectionRange(start, start);
+      } else if (start > 0) {
+        funcInput.value = funcInput.value.slice(0, start - 1) + funcInput.value.slice(start);
+        funcInput.setSelectionRange(start - 1, start - 1);
+      }
+      funcInput.focus();
+      return;
+    }
+
+    if (btn.id === 'kbdClear') {
+      funcInput.value = '';
+      funcInput.focus();
+      return;
+    }
+
+    const text = btn.dataset.insert;
+    if (text) insertAtCursor(text);
+  });
 
 })();

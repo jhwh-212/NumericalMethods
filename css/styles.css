@@ -376,7 +376,10 @@ a { text-decoration: none; color: inherit; }
    Form Controls
    ============================================= */
 .input-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
-.input-group label { font-size: 0.88rem; font-weight: 600; color: var(--text-muted); }
+.input-group label {
+  font-size: 0.88rem; font-weight: 600; color: var(--text-muted);
+  display: flex; align-items: center; justify-content: space-between;
+}
 .input-group input, .input-group select {
   padding: 10px 14px;
   border: 1.5px solid var(--border);
@@ -566,6 +569,96 @@ a { text-decoration: none; color: inherit; }
 @media (max-width: 400px) {
   .method-cards { grid-template-columns: 1fr; }
 }
+
+/* =============================================
+   Math Keyboard Toggle Button
+   ============================================= */
+.kbd-toggle-btn {
+  background: var(--primary-light);
+  border: 1px solid var(--primary);
+  color: var(--primary);
+  border-radius: 6px;
+  padding: 3px 10px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.kbd-toggle-btn:hover { background: var(--primary); color: #fff; }
+.kbd-toggle-btn.active { background: var(--primary); color: #fff; }
+
+/* =============================================
+   Math Keyboard Panel
+   ============================================= */
+.math-keyboard {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+  margin-bottom: 16px;
+  animation: fadeIn 0.18s ease;
+}
+
+.kbd-section {
+  margin-bottom: 12px;
+}
+.kbd-section:last-child { margin-bottom: 0; }
+
+.kbd-label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-light);
+  margin-bottom: 6px;
+}
+
+.kbd-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.kbd-btn {
+  border: 1.5px solid var(--border);
+  border-radius: 7px;
+  padding: 6px 10px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.12s ease;
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--font);
+  line-height: 1.2;
+  min-width: 44px;
+  text-align: center;
+  user-select: none;
+}
+.kbd-btn:hover { transform: translateY(-2px); box-shadow: 0 3px 8px rgba(0,0,0,0.12); }
+.kbd-btn:active { transform: translateY(0); box-shadow: none; }
+
+/* Category colours */
+.kbd-btn.trig     { border-color: #93c5fd; color: #1d4ed8; background: #eff6ff; }
+.kbd-btn.trig-inv { border-color: #6ee7f7; color: #0e7490; background: #ecfeff; }
+.kbd-btn.func     { border-color: #86efac; color: #15803d; background: #f0fdf4; }
+.kbd-btn.power    { border-color: #fcd34d; color: #92400e; background: #fffbeb; }
+.kbd-btn.const    { border-color: #c4b5fd; color: #6d28d9; background: #f5f3ff; }
+.kbd-btn.op       { border-color: var(--border); color: var(--text); background: var(--surface); font-size: 1rem; }
+.kbd-btn.digit    { border-color: var(--border); color: var(--text); background: var(--surface); font-family: var(--font-mono); }
+.kbd-btn.op-back  { border-color: #fca5a5; color: #dc2626; background: #fef2f2; font-size: 1rem; min-width: 44px; }
+.kbd-btn.op-clear { border-color: #f97316; color: #c2410c; background: #fff7ed; font-weight: 800; }
+
+[data-theme="dark"] .kbd-btn.trig     { background: #1e3a5f; border-color: #3b82f6; color: #93c5fd; }
+[data-theme="dark"] .kbd-btn.trig-inv { background: #0c3040; border-color: #22d3ee; color: #67e8f9; }
+[data-theme="dark"] .kbd-btn.func     { background: #052e16; border-color: #22c55e; color: #86efac; }
+[data-theme="dark"] .kbd-btn.power    { background: #2d1f00; border-color: #f59e0b; color: #fcd34d; }
+[data-theme="dark"] .kbd-btn.const    { background: #2e1a4a; border-color: #a855f7; color: #c4b5fd; }
+[data-theme="dark"] .kbd-btn.op-back  { background: #2d1515; border-color: #ef4444; color: #fca5a5; }
+[data-theme="dark"] .kbd-btn.op-clear { background: #2d1800; border-color: #f97316; color: #fdba74; }
 
 /* =============================================
    Print styles

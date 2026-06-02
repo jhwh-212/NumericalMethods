@@ -124,9 +124,115 @@
             <!-- Integration inputs -->
             <div id="integrationInputs" class="input-group-set" style="display:none;">
               <div class="input-group">
-                <label for="funcInput">Function f(x)</label>
+                <label for="funcInput">
+                  Function f(x)
+                  <button type="button" class="kbd-toggle-btn" id="kbdToggle" title="Open math keyboard">
+                    ⌨ Keyboard
+                  </button>
+                </label>
                 <input type="text" id="funcInput" placeholder="e.g. x^3 + 2*x - 1" autocomplete="off" spellcheck="false" />
                 <small class="hint">Use: x^2, sin(x), cos(x), exp(x), log(x), sqrt(x), pi, e</small>
+              </div>
+
+              <!-- Math Keyboard -->
+              <div class="math-keyboard" id="mathKeyboard" style="display:none;" aria-label="Math keyboard">
+                <div class="kbd-section">
+                  <span class="kbd-label">Trigonometry</span>
+                  <div class="kbd-row">
+                    <button class="kbd-btn trig" data-insert="sin(">sin</button>
+                    <button class="kbd-btn trig" data-insert="cos(">cos</button>
+                    <button class="kbd-btn trig" data-insert="tan(">tan</button>
+                    <button class="kbd-btn trig" data-insert="csc(">csc</button>
+                    <button class="kbd-btn trig" data-insert="sec(">sec</button>
+                    <button class="kbd-btn trig" data-insert="cot(">cot</button>
+                  </div>
+                  <div class="kbd-row">
+                    <button class="kbd-btn trig-inv" data-insert="asin(">sin⁻¹</button>
+                    <button class="kbd-btn trig-inv" data-insert="acos(">cos⁻¹</button>
+                    <button class="kbd-btn trig-inv" data-insert="atan(">tan⁻¹</button>
+                    <button class="kbd-btn trig-inv" data-insert="sinh(">sinh</button>
+                    <button class="kbd-btn trig-inv" data-insert="cosh(">cosh</button>
+                    <button class="kbd-btn trig-inv" data-insert="tanh(">tanh</button>
+                  </div>
+                </div>
+
+                <div class="kbd-section">
+                  <span class="kbd-label">Functions</span>
+                  <div class="kbd-row">
+                    <button class="kbd-btn func" data-insert="sqrt(">√x</button>
+                    <button class="kbd-btn func" data-insert="cbrt(">∛x</button>
+                    <button class="kbd-btn func" data-insert="abs(">|x|</button>
+                    <button class="kbd-btn func" data-insert="exp(">eˣ</button>
+                    <button class="kbd-btn func" data-insert="log(">log</button>
+                    <button class="kbd-btn func" data-insert="log2(">log₂</button>
+                    <button class="kbd-btn func" data-insert="log10(">log₁₀</button>
+                    <button class="kbd-btn func" data-insert="ln(">ln</button>
+                  </div>
+                  <div class="kbd-row">
+                    <button class="kbd-btn func" data-insert="ceil(">⌈x⌉</button>
+                    <button class="kbd-btn func" data-insert="floor(">⌊x⌋</button>
+                    <button class="kbd-btn func" data-insert="round(">round</button>
+                    <button class="kbd-btn func" data-insert="sign(">sign</button>
+                    <button class="kbd-btn func" data-insert="factorial(">x!</button>
+                    <button class="kbd-btn func" data-insert="gamma(">Γ(x)</button>
+                  </div>
+                </div>
+
+                <div class="kbd-section">
+                  <span class="kbd-label">Powers &amp; Roots</span>
+                  <div class="kbd-row">
+                    <button class="kbd-btn power" data-insert="^2">x²</button>
+                    <button class="kbd-btn power" data-insert="^3">x³</button>
+                    <button class="kbd-btn power" data-insert="^(">xⁿ</button>
+                    <button class="kbd-btn power" data-insert="^(1/)">x^(1/n)</button>
+                    <button class="kbd-btn power" data-insert="^(-1)">x⁻¹</button>
+                    <button class="kbd-btn power" data-insert="sqrt(x^">√(xⁿ)</button>
+                  </div>
+                </div>
+
+                <div class="kbd-section">
+                  <span class="kbd-label">Constants &amp; Variable</span>
+                  <div class="kbd-row">
+                    <button class="kbd-btn const" data-insert="x">x</button>
+                    <button class="kbd-btn const" data-insert="pi">π</button>
+                    <button class="kbd-btn const" data-insert="e">e</button>
+                    <button class="kbd-btn const" data-insert="Infinity">∞</button>
+                    <button class="kbd-btn const" data-insert="phi">φ</button>
+                    <button class="kbd-btn const" data-insert="tau">τ</button>
+                  </div>
+                </div>
+
+                <div class="kbd-section">
+                  <span class="kbd-label">Operators</span>
+                  <div class="kbd-row">
+                    <button class="kbd-btn op" data-insert="(">(</button>
+                    <button class="kbd-btn op" data-insert=")">)</button>
+                    <button class="kbd-btn op" data-insert="^">^</button>
+                    <button class="kbd-btn op" data-insert="*">×</button>
+                    <button class="kbd-btn op" data-insert="/">/</button>
+                    <button class="kbd-btn op" data-insert="+">+</button>
+                    <button class="kbd-btn op" data-insert="-">−</button>
+                    <button class="kbd-btn op" data-insert=".">.</button>
+                    <button class="kbd-btn op-back" id="kbdBackspace">⌫</button>
+                    <button class="kbd-btn op-clear" id="kbdClear">C</button>
+                  </div>
+                </div>
+
+                <div class="kbd-section">
+                  <span class="kbd-label">Digits</span>
+                  <div class="kbd-row">
+                    <button class="kbd-btn digit" data-insert="7">7</button>
+                    <button class="kbd-btn digit" data-insert="8">8</button>
+                    <button class="kbd-btn digit" data-insert="9">9</button>
+                    <button class="kbd-btn digit" data-insert="4">4</button>
+                    <button class="kbd-btn digit" data-insert="5">5</button>
+                    <button class="kbd-btn digit" data-insert="6">6</button>
+                    <button class="kbd-btn digit" data-insert="1">1</button>
+                    <button class="kbd-btn digit" data-insert="2">2</button>
+                    <button class="kbd-btn digit" data-insert="3">3</button>
+                    <button class="kbd-btn digit" data-insert="0">0</button>
+                  </div>
+                </div>
               </div>
               <div class="input-row">
                 <div class="input-group">
