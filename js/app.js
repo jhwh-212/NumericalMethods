@@ -383,40 +383,56 @@
     // Always fill f(x)
     funcInput.value = expr;
 
-    // Only fill bounds if they were detected in the text
-    if (a !== '') document.getElementById('lowerBound').value = a;
-    if (b !== '') document.getElementById('upperBound').value = b;
+    const lowerEl = document.getElementById('lowerBound');
+    const upperEl = document.getElementById('upperBound');
 
-    showNLPreview(expr, a, b, valid, hasIntegral);
+    let usedA = a, usedB = b;
+    let boundsWereDefaulted = false;
+
+    if (a !== '' && b !== '') {
+      // Bounds detected in the text — use them
+      lowerEl.value = a;
+      upperEl.value = b;
+    } else if (!hasIntegral) {
+      // No "integral" keyword and no bounds — keep existing field values if set,
+      // otherwise default to 0 and 1 so Calculate never fails
+      if (lowerEl.value === '' || upperEl.value === '') {
+        lowerEl.value = lowerEl.value !== '' ? lowerEl.value : '0';
+        upperEl.value = upperEl.value !== '' ? upperEl.value : '1';
+        boundsWereDefaulted = true;
+      }
+      usedA = lowerEl.value;
+      usedB = upperEl.value;
+    }
+    // If hasIntegral && no bounds found — leave fields as-is, warn user
+
+    showNLPreview(expr, usedA, usedB, valid, hasIntegral, boundsWereDefaulted, a !== '' && b !== '');
 
     funcInput.classList.add('field-flash');
     setTimeout(() => funcInput.classList.remove('field-flash'), 600);
   }
 
-  function showNLPreview(expr, a, b, valid, hasIntegral) {
+  function showNLPreview(expr, a, b, valid, hasIntegral, defaulted, boundsFromText) {
     nlPreviewBar.style.display = 'flex';
-    const boundsFound = a !== '' && b !== '';
 
     let state, icon, msg;
 
     if (!valid) {
-      // Bad expression
       state = 'err'; icon = '⚠';
       msg = 'f(x) = ' + expr + '   — check your expression';
-    } else if (hasIntegral && !boundsFound) {
-      // User wrote "integral" but didn't give bounds
+    } else if (hasIntegral && !boundsFromText) {
+      // User said "integral" but didn't give bounds
       state = 'err'; icon = '⚠';
-      msg = 'f(x) = ' + expr + '   — add "from X to Y" to set bounds (required for integral)';
-    } else if (!hasIntegral && !boundsFound) {
-      // No integral keyword, no bounds — fine, user fills bounds manually
-      state = 'ok'; icon = '✓';
-      msg = 'f(x) = ' + expr + '   — fill in a and b below to calculate';
+      msg = 'f(x) = ' + expr + '   — add "from X to Y" to specify bounds for the integral';
+    } else if (defaulted) {
+      // No "integral", no bounds → defaults applied
+      state = 'hint'; icon = 'ℹ';
+      msg = 'f(x) = ' + expr + '   — bounds defaulted to a=0, b=1  (adjust below if needed)';
     } else {
-      // All good
       state = 'ok'; icon = '✓';
       msg = 'f(x) = ' + expr;
-      if (a) msg += '   a = ' + a;
-      if (b) msg += '   b = ' + b;
+      if (a !== '') msg += '   a = ' + a;
+      if (b !== '') msg += '   b = ' + b;
     }
 
     nlPreviewBar.className = 'nl-preview-bar ' + state;
@@ -434,7 +450,9 @@
       const { expr, a, b, hasIntegral } = NM.parseNL(raw);
       let valid = false;
       try { NM.evalFn(expr, 1); valid = true; } catch(e) {}
-      showNLPreview(expr, a, b, valid, hasIntegral);
+      const boundsFromText = a !== '' && b !== '';
+      const defaulted = !hasIntegral && !boundsFromText;
+      showNLPreview(expr, a, b, valid, hasIntegral, defaulted, boundsFromText);
     }, 400);
   });
 
