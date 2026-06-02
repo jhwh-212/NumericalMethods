@@ -10,16 +10,19 @@ const NM = {};
 NM.parseNL = function(raw) {
   let s = raw.trim().toLowerCase();
 
-  // ── 0. Pre-normalize Python/JS power syntax & shorthand ─────────────
-  s = s.replace(/\*\*/g, '^');          // 2**x  → 2^x
-  s = s.replace(/\^{2,}/g, '^');        // ^^    → ^
+  // ── 0. Pre-normalize Python/JS power syntax ──────────────────────────
+  s = s.replace(/\*\*/g, '^');
+  s = s.replace(/\^{2,}/g, '^');
 
-  // ── 1. Extract bounds — only when "from X to Y" is present ──────────
+  // ── 1. Detect whether the user explicitly asked for an integral ──────
+  const hasIntegral = /\bintegral\b/.test(s);
+
+  // ── 2. Extract bounds — only when "from X to Y" is present ──────────
   let a = '', b = '';
   const bm = s.match(/\bfrom\s+([-+]?[\d.]+|pi|e|tau)\s+to\s+([-+]?[\d.]+|pi|e|tau)\b/);
   if (bm) { a = bm[1]; b = bm[2]; s = s.slice(0, bm.index) + s.slice(bm.index + bm[0].length); }
 
-  // ── 2. Remove noise words ────────────────────────────────────────────
+  // ── 3. Remove noise words ────────────────────────────────────────────
   ['integral','function','evaluate','compute','calculate','the','of the'].forEach(w => {
     s = s.replace(new RegExp('\\b' + w + '\\b', 'g'), ' ');
   });
@@ -98,7 +101,7 @@ NM.parseNL = function(raw) {
   const cl = (s.match(/\)/g) || []).length;
   s += ')'.repeat(Math.max(0, op - cl));
 
-  return { expr: s.trim(), a, b };
+  return { expr: s.trim(), a, b, hasIntegral };
 };
 
 /* ---- Utility: evaluate f(x) safely ---- */

@@ -375,35 +375,52 @@
     const raw = nlInput.value.trim();
     if (!raw) return;
 
-    const { expr, a, b } = NM.parseNL(raw);
+    const { expr, a, b, hasIntegral } = NM.parseNL(raw);
 
     let valid = false;
-    try { NM.evalFn(expr, 1); valid = true; } catch(e) { valid = false; }
+    try { NM.evalFn(expr, 1); valid = true; } catch(e) {}
 
-    // Fill fields
+    // Always fill f(x)
     funcInput.value = expr;
+
+    // Only fill bounds if they were detected in the text
     if (a !== '') document.getElementById('lowerBound').value = a;
     if (b !== '') document.getElementById('upperBound').value = b;
 
-    // Show preview bar
-    showNLPreview(expr, a, b, valid);
+    showNLPreview(expr, a, b, valid, hasIntegral);
 
-    // Flash the funcInput field to signal it was filled
     funcInput.classList.add('field-flash');
     setTimeout(() => funcInput.classList.remove('field-flash'), 600);
   }
 
-  function showNLPreview(expr, a, b, valid) {
+  function showNLPreview(expr, a, b, valid, hasIntegral) {
     nlPreviewBar.style.display = 'flex';
     const boundsFound = a !== '' && b !== '';
-    const state = !valid ? 'err' : !boundsFound ? 'hint' : 'ok';
+
+    let state, icon, msg;
+
+    if (!valid) {
+      // Bad expression
+      state = 'err'; icon = '⚠';
+      msg = 'f(x) = ' + expr + '   — check your expression';
+    } else if (hasIntegral && !boundsFound) {
+      // User wrote "integral" but didn't give bounds
+      state = 'err'; icon = '⚠';
+      msg = 'f(x) = ' + expr + '   — add "from X to Y" to set bounds (required for integral)';
+    } else if (!hasIntegral && !boundsFound) {
+      // No integral keyword, no bounds — fine, user fills bounds manually
+      state = 'ok'; icon = '✓';
+      msg = 'f(x) = ' + expr + '   — fill in a and b below to calculate';
+    } else {
+      // All good
+      state = 'ok'; icon = '✓';
+      msg = 'f(x) = ' + expr;
+      if (a) msg += '   a = ' + a;
+      if (b) msg += '   b = ' + b;
+    }
+
     nlPreviewBar.className = 'nl-preview-bar ' + state;
-    nlPreviewIcon.textContent = state === 'ok' ? '✓' : state === 'hint' ? 'ℹ' : '⚠';
-    let msg = 'f(x) = ' + expr;
-    if (a) msg += '   a = ' + a;
-    if (b) msg += '   b = ' + b;
-    if (!valid)       msg += '   — check your expression';
-    else if (!boundsFound) msg += '   — fill in bounds a and b below, or add "from X to Y" to your text';
+    nlPreviewIcon.textContent = icon;
     nlPreviewText.textContent = msg;
   }
 
@@ -414,10 +431,10 @@
     _debounce = setTimeout(() => {
       const raw = nlInput.value.trim();
       if (!raw) { nlPreviewBar.style.display = 'none'; return; }
-      const { expr, a, b } = NM.parseNL(raw);
+      const { expr, a, b, hasIntegral } = NM.parseNL(raw);
       let valid = false;
       try { NM.evalFn(expr, 1); valid = true; } catch(e) {}
-      showNLPreview(expr, a, b, valid);
+      showNLPreview(expr, a, b, valid, hasIntegral);
     }, 400);
   });
 
@@ -428,11 +445,11 @@
 
   nlConvertBtn.addEventListener('click', doConvert);
 
-  // Example chips
+  // Example chips — fill textarea and auto-convert
   document.querySelectorAll('.nl-chip').forEach(chip => {
     chip.addEventListener('click', () => {
       nlInput.value = chip.dataset.nl;
-      nlInput.dispatchEvent(new Event('input')); // trigger live preview
+      doConvert();
     });
   });
 
