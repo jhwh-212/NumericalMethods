@@ -378,39 +378,6 @@ a { text-decoration: none; color: inherit; }
 .input-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
 .input-group label { font-size: 0.88rem; font-weight: 600; color: var(--text-muted); }
 
-.func-input-wrap {
-  display: flex;
-  gap: 0;
-  border: 1.5px solid var(--border);
-  border-radius: 8px;
-  overflow: hidden;
-  transition: border-color var(--transition), box-shadow var(--transition);
-}
-.func-input-wrap:focus-within {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(26,86,219,0.12);
-}
-.func-input-wrap input {
-  flex: 1;
-  border: none !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-  background: var(--surface2);
-  padding: 10px 14px;
-  color: var(--text);
-  font-size: 0.93rem;
-  font-family: var(--font-mono);
-  outline: none;
-}
-.func-input-wrap .kbd-toggle-btn {
-  border-radius: 0;
-  border: none;
-  border-left: 1.5px solid var(--border);
-  padding: 0 14px;
-  font-size: 0.82rem;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
 .input-group input, .input-group select {
   padding: 10px 14px;
   border: 1.5px solid var(--border);
@@ -602,94 +569,101 @@ a { text-decoration: none; color: inherit; }
 }
 
 /* =============================================
-   Math Keyboard Toggle Button
+   Natural Language Smart Input
    ============================================= */
-.kbd-toggle-btn {
-  background: var(--primary-light);
-  border: 1px solid var(--primary);
+.nl-section {
+  background: linear-gradient(135deg, #eef3ff 0%, #f0fdf4 100%);
+  border: 1.5px solid var(--primary);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  animation: fadeIn 0.2s ease;
+}
+[data-theme="dark"] .nl-section {
+  background: linear-gradient(135deg, #1a2340 0%, #0d2015 100%);
+  border-color: var(--primary);
+}
+
+.nl-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  font-weight: 700;
   color: var(--primary);
-  border-radius: 6px;
-  padding: 3px 10px;
-  font-size: 0.78rem;
-  font-weight: 600;
+  margin-bottom: 10px;
+  letter-spacing: 0.3px;
+}
+.nl-spark { font-size: 1.1rem; }
+
+.nl-textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.88rem;
+  font-family: var(--font);
+  resize: vertical;
+  min-height: 62px;
+  line-height: 1.6;
+  transition: border-color var(--transition), box-shadow var(--transition);
+  margin-bottom: 10px;
+}
+.nl-textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(26,86,219,0.1);
+}
+
+.nl-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.btn-convert {
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 18px;
+  font-size: 0.88rem;
+  font-weight: 700;
   cursor: pointer;
   transition: all var(--transition);
+  letter-spacing: 0.3px;
   white-space: nowrap;
   flex-shrink: 0;
 }
-.kbd-toggle-btn:hover { background: var(--primary); color: #fff; }
-.kbd-toggle-btn.active { background: var(--primary); color: #fff; }
+.btn-convert:hover { opacity: 0.88; transform: translateY(-1px); box-shadow: 0 4px 14px rgba(26,86,219,0.3); }
+.btn-convert:active { transform: translateY(0); }
 
-/* =============================================
-   Math Keyboard Panel
-   ============================================= */
-.math-keyboard {
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 14px;
-  margin-bottom: 16px;
-  animation: fadeIn 0.18s ease;
-}
-
-.kbd-section {
-  margin-bottom: 12px;
-}
-.kbd-section:last-child { margin-bottom: 0; }
-
-.kbd-label {
-  display: block;
-  font-size: 0.7rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: var(--text-light);
-  margin-bottom: 6px;
-}
-
-.kbd-row {
+.nl-result {
   display: flex;
+  align-items: center;
+  gap: 8px;
   flex-wrap: wrap;
-  gap: 5px;
+  animation: fadeIn 0.2s ease;
 }
-
-.kbd-btn {
-  border: 1.5px solid var(--border);
-  border-radius: 7px;
-  padding: 6px 10px;
-  font-size: 0.82rem;
+.nl-result-label {
+  font-size: 0.78rem;
   font-weight: 600;
-  cursor: pointer;
-  transition: all 0.12s ease;
-  background: var(--surface);
-  color: var(--text);
-  font-family: var(--font);
-  line-height: 1.2;
-  min-width: 44px;
-  text-align: center;
-  user-select: none;
+  color: var(--text-muted);
 }
-.kbd-btn:hover { transform: translateY(-2px); box-shadow: 0 3px 8px rgba(0,0,0,0.12); }
-.kbd-btn:active { transform: translateY(0); box-shadow: none; }
-
-/* Category colours */
-.kbd-btn.trig     { border-color: #93c5fd; color: #1d4ed8; background: #eff6ff; }
-.kbd-btn.trig-inv { border-color: #6ee7f7; color: #0e7490; background: #ecfeff; }
-.kbd-btn.func     { border-color: #86efac; color: #15803d; background: #f0fdf4; }
-.kbd-btn.power    { border-color: #fcd34d; color: #92400e; background: #fffbeb; }
-.kbd-btn.const    { border-color: #c4b5fd; color: #6d28d9; background: #f5f3ff; }
-.kbd-btn.op       { border-color: var(--border); color: var(--text); background: var(--surface); font-size: 1rem; }
-.kbd-btn.digit    { border-color: var(--border); color: var(--text); background: var(--surface); font-family: var(--font-mono); }
-.kbd-btn.op-back  { border-color: #fca5a5; color: #dc2626; background: #fef2f2; font-size: 1rem; min-width: 44px; }
-.kbd-btn.op-clear { border-color: #f97316; color: #c2410c; background: #fff7ed; font-weight: 800; }
-
-[data-theme="dark"] .kbd-btn.trig     { background: #1e3a5f; border-color: #3b82f6; color: #93c5fd; }
-[data-theme="dark"] .kbd-btn.trig-inv { background: #0c3040; border-color: #22d3ee; color: #67e8f9; }
-[data-theme="dark"] .kbd-btn.func     { background: #052e16; border-color: #22c55e; color: #86efac; }
-[data-theme="dark"] .kbd-btn.power    { background: #2d1f00; border-color: #f59e0b; color: #fcd34d; }
-[data-theme="dark"] .kbd-btn.const    { background: #2e1a4a; border-color: #a855f7; color: #c4b5fd; }
-[data-theme="dark"] .kbd-btn.op-back  { background: #2d1515; border-color: #ef4444; color: #fca5a5; }
-[data-theme="dark"] .kbd-btn.op-clear { background: #2d1800; border-color: #f97316; color: #fdba74; }
+.nl-result-expr {
+  font-family: var(--font-mono);
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--success);
+  background: rgba(16,185,129,0.1);
+  border: 1px solid rgba(16,185,129,0.3);
+  border-radius: 6px;
+  padding: 3px 10px;
+}
+.nl-result-expr.error { color: var(--error); background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.3); }
 
 /* =============================================
    Print styles

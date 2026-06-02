@@ -4,6 +4,143 @@
 
 const NM = {};
 
+/* =============================================
+   Natural Language → Math Expression Parser
+   ============================================= */
+NM.parseNL = function(input) {
+  let s = input.trim().toLowerCase();
+
+  // ── 1. Extract integration bounds ───────────────────────────────────
+  // "from 0 to 4", "from -1 to 1", "between 0 and pi"
+  let a = '', b = '';
+  const boundRe = [
+    /from\s+([-+]?[\d.]+|pi|e)\s+to\s+([-+]?[\d.]+|pi|e)/,
+    /between\s+([-+]?[\d.]+|pi|e)\s+and\s+([-+]?[\d.]+|pi|e)/,
+  ];
+  for (const re of boundRe) {
+    const m = s.match(re);
+    if (m) { a = m[1]; b = m[2]; s = s.replace(m[0], ''); break; }
+  }
+
+  // ── 2. Strip structural words ────────────────────────────────────────
+  s = s.replace(/\bintegral\b/g, '');
+  s = s.replace(/\bfunction\b/g, '');
+  s = s.replace(/\bthe\b/g, '');
+  s = s.replace(/\bvalue\b/g, '');
+  s = s.replace(/\bwhere\b/g, '');
+
+  // ── 3. Functions (longest phrases first to avoid partial matches) ────
+  const fnMap = [
+    [/\bsquare\s+root\s+of\b/g,             'sqrt('],
+    [/\bsquare\s+root\b/g,                  'sqrt('],
+    [/\bcube\s+root\s+of\b/g,               'cbrt('],
+    [/\bcube\s+root\b/g,                    'cbrt('],
+    [/\bsqrt\s+of\b/g,                      'sqrt('],
+    [/\bsqrt\b/g,                           'sqrt('],
+    [/\bnatural\s+log(?:arithm)?\s+of\b/g,  'ln('],
+    [/\bnatural\s+log(?:arithm)?\b/g,       'ln('],
+    [/\bln\s+of\b/g,                        'ln('],
+    [/\bln\b/g,                             'ln('],
+    [/\blog\s+base\s*2\s+of\b/g,            'log2('],
+    [/\blog\s+base\s*10\s+of\b/g,           'log10('],
+    [/\blog\s*2\s+of\b/g,                   'log2('],
+    [/\blog\s*10\s+of\b/g,                  'log10('],
+    [/\blog\s+of\b/g,                       'log('],
+    [/\blog\b/g,                            'log('],
+    [/\be\s+to\s+the\s+power\s+of\b/g,      'exp('],
+    [/\be\s+to\s+the\s+power\b/g,           'exp('],
+    [/\be\s+to\s+the\b/g,                   'exp('],
+    [/\bexponential\s+of\b/g,               'exp('],
+    [/\bexp\s+of\b/g,                       'exp('],
+    [/\bexp\b/g,                            'exp('],
+    [/\babsolute\s+value\s+of\b/g,          'abs('],
+    [/\babs\s+of\b/g,                       'abs('],
+    [/\babs\b/g,                            'abs('],
+    [/\bsinh\b/g,                           'sinh('],
+    [/\bcosh\b/g,                           'cosh('],
+    [/\btanh\b/g,                           'tanh('],
+    [/\bsine\s+of\b/g,                      'sin('],
+    [/\bsin\s+of\b/g,                       'sin('],
+    [/\bsin\b/g,                            'sin('],
+    [/\bcosine\s+of\b/g,                    'cos('],
+    [/\bcos\s+of\b/g,                       'cos('],
+    [/\bcos\b/g,                            'cos('],
+    [/\btangent\s+of\b/g,                   'tan('],
+    [/\btan\s+of\b/g,                       'tan('],
+    [/\btan\b/g,                            'tan('],
+    [/\barcsin\b/g,                         'asin('],
+    [/\barccos\b/g,                         'acos('],
+    [/\barctan\b/g,                         'atan('],
+    [/\bceil(?:ing)?\s+of\b/g,              'ceil('],
+    [/\bfloor\s+of\b/g,                     'floor('],
+  ];
+  for (const [re, rep] of fnMap) s = s.replace(re, rep);
+
+  // ── 4. Powers ────────────────────────────────────────────────────────
+  s = s.replace(/\bto\s+the\s+power\s+of\s+([\d.]+)/g,    '^$1');
+  s = s.replace(/\bto\s+the\s+power\s+of\s+\((.*?)\)/g,   '^($1)');
+  s = s.replace(/\bto\s+the\s+power\s+([\d.]+)/g,         '^$1');
+  s = s.replace(/\bto\s+the\s+([\d]+)(?:st|nd|rd|th)\b/g, '^$1');
+  s = s.replace(/\bto\s+the\s+([\d.]+)/g,                 '^$1');
+  s = s.replace(/\bsquared\b/g,                           '^2');
+  s = s.replace(/\bcubed\b/g,                             '^3');
+  s = s.replace(/\bpow(?:er)?\s*([\d.]+)/g,               '^$1');
+  s = s.replace(/\bpower\s+([\d.]+)/g,                    '^$1');
+  // Clean spaces around ^
+  s = s.replace(/\s*\^\s*/g, '^');
+
+  // ── 5. Arithmetic operators ──────────────────────────────────────────
+  s = s.replace(/\bplus\b/g,           '+');
+  s = s.replace(/\bminus\b/g,          '-');
+  s = s.replace(/\btimes\b/g,          '*');
+  s = s.replace(/\bmultiplied\s+by\b/g,'*');
+  s = s.replace(/\bdivided\s+by\b/g,  '/');
+  s = s.replace(/\bover\b/g,           '/');
+  s = s.replace(/\bnegative\b/g,       '-');
+
+  // ── 6. Constants (protect before implicit-mult step) ────────────────
+  s = s.replace(/\bpi\b/g,   'pi');
+  s = s.replace(/\bphi\b/g,  'phi');
+  s = s.replace(/\btau\b/g,  'tau');
+  // standalone 'e' handled carefully below
+
+  // ── 7. Implicit multiplication ───────────────────────────────────────
+  // digit + space + letter/( → digit * letter/(
+  s = s.replace(/(\d)\s+([a-z(])/g, '$1*$2');
+  // digit immediately before letter (not digit, not existing operator)
+  // but skip e^ to not break "2e^x" before it's fixed
+  s = s.replace(/(\d)(x|pi|phi|tau|sin|cos|tan|log|ln|sqrt|cbrt|abs|exp|asin|acos|atan|sinh|cosh|tanh)/g, '$1*$2');
+  // digit before (
+  s = s.replace(/(\d)\(/g, '$1*(');
+  // x before (  e.g. "x(x+1)" → "x*(x+1)"
+  s = s.replace(/x\s*\(/g, 'x*(');
+  // digit alone followed by 'e' not part of 'exp'
+  s = s.replace(/(\d)e(?!\^|xp)/g, '$1*e');
+
+  // ── 8. Remove leftover plain words that aren't math ─────────────────
+  // strip words made entirely of letters that aren't known math tokens
+  const mathTokens = /\b(x|pi|phi|tau|e|sin|cos|tan|asin|acos|atan|sinh|cosh|tanh|sqrt|cbrt|log|log2|log10|ln|exp|abs|ceil|floor|round)\b/;
+  s = s.replace(/\b([a-df-wyz][a-z]*)\b/g, (m) => mathTokens.test(m) ? m : '');
+
+  // ── 9. Clean up ──────────────────────────────────────────────────────
+  // Remove spaces around all operators
+  s = s.replace(/\s*([\+\-\*\/\^])\s*/g, '$1');
+  // Collapse multiple spaces
+  s = s.replace(/\s+/g, '');
+  // Remove leading/trailing dangling operators (not minus, that could be unary)
+  s = s.replace(/^[+*\/^]+/, '');
+  s = s.replace(/[+*\/^]+$/, '');
+  // Fix double operators like "+-" or "--" → keep last one
+  s = s.replace(/([+\-*\/^])\s*([+*\/^])/g, '$2');
+
+  // ── 10. Auto-close open parentheses ─────────────────────────────────
+  const opens  = (s.match(/\(/g) || []).length;
+  const closes = (s.match(/\)/g) || []).length;
+  s += ')'.repeat(Math.max(0, opens - closes));
+
+  return { expr: s.trim(), a, b };
+};
+
 /* ---- Utility: evaluate f(x) safely ---- */
 NM.evalFn = function(expr, x) {
   try {

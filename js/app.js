@@ -30,8 +30,10 @@
   const printResultBtn = document.getElementById('printResultBtn');
   const printBtn       = document.getElementById('printBtn');
   const exportPdfBtn   = document.getElementById('exportPdfBtn');
-  const kbdToggle      = document.getElementById('kbdToggle');
-  const mathKeyboard   = document.getElementById('mathKeyboard');
+  const nlInput        = document.getElementById('nlInput');
+  const nlConvertBtn   = document.getElementById('nlConvertBtn');
+  const nlResult       = document.getElementById('nlResult');
+  const nlResultExpr   = document.getElementById('nlResultExpr');
 
   // Input containers
   const integInputs    = document.getElementById('integrationInputs');
@@ -137,16 +139,9 @@
         document.getElementById('numIntervals').removeAttribute('step');
         document.getElementById('numIntervals').value = '8';
       }
-      // Show keyboard by default for integration methods
-      mathKeyboard.style.display = 'block';
-      kbdToggle.classList.add('active');
-      kbdToggle.textContent = '⌨ Hide Keyboard';
     } else {
       integInputs.style.display = 'none';
       interpInputs.style.display = 'block';
-      mathKeyboard.style.display = 'none';
-      kbdToggle.classList.remove('active');
-      kbdToggle.textContent = '⌨ Keyboard';
       generateDataTable(+document.getElementById('numPoints').value || 4);
     }
 
@@ -372,62 +367,43 @@
   // ---- Keyboard shortcut hint ----
   calcBtn.title = 'Calculate (Ctrl+Enter)';
 
-  // ---- Math Keyboard ----
+  // ---- Natural Language Converter ────────────────────────────────────
   const funcInput = document.getElementById('funcInput');
 
-  // Toggle keyboard visibility
-  kbdToggle.addEventListener('click', () => {
-    const opening = mathKeyboard.style.display === 'none';
-    mathKeyboard.style.display = opening ? 'block' : 'none';
-    kbdToggle.classList.toggle('active', opening);
-    kbdToggle.textContent = opening ? '⌨ Hide Keyboard' : '⌨ Keyboard';
-  });
+  function doConvert() {
+    const raw = nlInput.value.trim();
+    if (!raw) return;
 
-  // Insert text at cursor; if text ends with '(' auto-close and place cursor inside
-  function insertAtCursor(text) {
-    funcInput.focus();
-    const start = funcInput.selectionStart;
-    const end   = funcInput.selectionEnd;
-    const val   = funcInput.value;
+    const parsed = NM.parseNL(raw);
+    const { expr, a, b } = parsed;
 
-    if (text.endsWith('(')) {
-      // Insert "fn()" and place cursor between the parens
-      const full = text + ')';
-      funcInput.value = val.slice(0, start) + full + val.slice(end);
-      funcInput.setSelectionRange(start + text.length, start + text.length);
-    } else {
-      funcInput.value = val.slice(0, start) + text + val.slice(end);
-      funcInput.setSelectionRange(start + text.length, start + text.length);
-    }
+    // Validate the result is evaluable
+    let valid = true;
+    try { NM.evalFn(expr, 1); } catch(e) { valid = false; }
+
+    // Fill f(x) field
+    funcInput.value = expr;
+
+    // Fill bounds if detected
+    if (a !== '') document.getElementById('lowerBound').value = a;
+    if (b !== '') document.getElementById('upperBound').value = b;
+
+    // Show result feedback
+    nlResult.style.display = 'flex';
+    nlResultExpr.className = 'nl-result-expr' + (valid ? '' : ' error');
+
+    let msg = 'f(x) = ' + expr;
+    if (a !== '') msg += '  |  a = ' + a;
+    if (b !== '') msg += '  |  b = ' + b;
+    if (!valid) msg += '  ⚠ check expression';
+    nlResultExpr.textContent = msg;
   }
 
-  // Keyboard button clicks
-  mathKeyboard.addEventListener('click', e => {
-    const btn = e.target.closest('.kbd-btn');
-    if (!btn) return;
+  nlConvertBtn.addEventListener('click', doConvert);
 
-    if (btn.id === 'kbdBackspace') {
-      const start = funcInput.selectionStart;
-      const end   = funcInput.selectionEnd;
-      if (start !== end) {
-        funcInput.value = funcInput.value.slice(0, start) + funcInput.value.slice(end);
-        funcInput.setSelectionRange(start, start);
-      } else if (start > 0) {
-        funcInput.value = funcInput.value.slice(0, start - 1) + funcInput.value.slice(start);
-        funcInput.setSelectionRange(start - 1, start - 1);
-      }
-      funcInput.focus();
-      return;
-    }
-
-    if (btn.id === 'kbdClear') {
-      funcInput.value = '';
-      funcInput.focus();
-      return;
-    }
-
-    const text = btn.dataset.insert;
-    if (text) insertAtCursor(text);
+  // Also convert on Enter key inside the textarea
+  nlInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); doConvert(); }
   });
 
 })();
