@@ -32,8 +32,9 @@
   const exportPdfBtn   = document.getElementById('exportPdfBtn');
   const nlInput        = document.getElementById('nlInput');
   const nlConvertBtn   = document.getElementById('nlConvertBtn');
-  const nlResult       = document.getElementById('nlResult');
-  const nlResultExpr   = document.getElementById('nlResultExpr');
+  const nlPreviewBar   = document.getElementById('nlPreviewBar');
+  const nlPreviewIcon  = document.getElementById('nlPreviewIcon');
+  const nlPreviewText  = document.getElementById('nlPreviewText');
 
   // Input containers
   const integInputs    = document.getElementById('integrationInputs');
@@ -374,36 +375,62 @@
     const raw = nlInput.value.trim();
     if (!raw) return;
 
-    const parsed = NM.parseNL(raw);
-    const { expr, a, b } = parsed;
+    const { expr, a, b } = NM.parseNL(raw);
 
-    // Validate the result is evaluable
-    let valid = true;
-    try { NM.evalFn(expr, 1); } catch(e) { valid = false; }
+    let valid = false;
+    try { NM.evalFn(expr, 1); valid = true; } catch(e) { valid = false; }
 
-    // Fill f(x) field
+    // Fill fields
     funcInput.value = expr;
-
-    // Fill bounds if detected
     if (a !== '') document.getElementById('lowerBound').value = a;
     if (b !== '') document.getElementById('upperBound').value = b;
 
-    // Show result feedback
-    nlResult.style.display = 'flex';
-    nlResultExpr.className = 'nl-result-expr' + (valid ? '' : ' error');
+    // Show preview bar
+    showNLPreview(expr, a, b, valid);
 
-    let msg = 'f(x) = ' + expr;
-    if (a !== '') msg += '  |  a = ' + a;
-    if (b !== '') msg += '  |  b = ' + b;
-    if (!valid) msg += '  ⚠ check expression';
-    nlResultExpr.textContent = msg;
+    // Flash the funcInput field to signal it was filled
+    funcInput.classList.add('field-flash');
+    setTimeout(() => funcInput.classList.remove('field-flash'), 600);
   }
+
+  function showNLPreview(expr, a, b, valid) {
+    nlPreviewBar.style.display = 'flex';
+    nlPreviewBar.className = 'nl-preview-bar ' + (valid ? 'ok' : 'err');
+    nlPreviewIcon.textContent = valid ? '✓' : '⚠';
+    let msg = 'f(x) = ' + expr;
+    if (a) msg += '   a = ' + a;
+    if (b) msg += '   b = ' + b;
+    if (!valid) msg += '   — expression may need adjustment';
+    nlPreviewText.textContent = msg;
+  }
+
+  // Live preview while typing (debounced 400ms)
+  let _debounce;
+  nlInput.addEventListener('input', () => {
+    clearTimeout(_debounce);
+    _debounce = setTimeout(() => {
+      const raw = nlInput.value.trim();
+      if (!raw) { nlPreviewBar.style.display = 'none'; return; }
+      const { expr, a, b } = NM.parseNL(raw);
+      let valid = false;
+      try { NM.evalFn(expr, 1); valid = true; } catch(e) {}
+      showNLPreview(expr, a, b, valid);
+    }, 400);
+  });
+
+  // Enter key converts
+  nlInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); doConvert(); }
+  });
 
   nlConvertBtn.addEventListener('click', doConvert);
 
-  // Also convert on Enter key inside the textarea
-  nlInput.addEventListener('keydown', e => {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); doConvert(); }
+  // Example chips
+  document.querySelectorAll('.nl-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      nlInput.value = chip.dataset.nl;
+      nlInput.dispatchEvent(new Event('input')); // trigger live preview
+    });
   });
 
 })();

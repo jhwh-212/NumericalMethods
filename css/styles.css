@@ -544,6 +544,13 @@ a { text-decoration: none; color: inherit; }
 
 #plotContainer { width: 100%; min-height: 420px; }
 
+/* f(x) input flash animation after smart convert */
+@keyframes fieldFlash {
+  0%   { border-color: var(--success); box-shadow: 0 0 0 3px rgba(16,185,129,0.25); }
+  100% { border-color: var(--border);  box-shadow: none; }
+}
+.field-flash { animation: fieldFlash 0.6s ease forwards; }
+
 /* =============================================
    Responsive
    ============================================= */
@@ -569,101 +576,146 @@ a { text-decoration: none; color: inherit; }
 }
 
 /* =============================================
-   Natural Language Smart Input
+   Smart Natural Language Input Card
    ============================================= */
-.nl-section {
-  background: linear-gradient(135deg, #eef3ff 0%, #f0fdf4 100%);
+.nl-card {
+  background: var(--surface);
   border: 1.5px solid var(--primary);
-  border-radius: var(--radius);
-  padding: 14px 16px;
-  margin-bottom: 16px;
-  animation: fadeIn 0.2s ease;
-}
-[data-theme="dark"] .nl-section {
-  background: linear-gradient(135deg, #1a2340 0%, #0d2015 100%);
-  border-color: var(--primary);
+  border-radius: 14px;
+  padding: 0;
+  margin-bottom: 20px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(26,86,219,0.1);
+  animation: fadeIn 0.25s ease;
 }
 
-.nl-header {
+.nl-card-header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: var(--primary);
-  margin-bottom: 10px;
-  letter-spacing: 0.3px;
+  gap: 12px;
+  padding: 14px 18px;
+  background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+  color: #fff;
 }
-.nl-spark { font-size: 1.1rem; }
+.nl-card-icon { font-size: 1.3rem; flex-shrink: 0; }
+.nl-card-name { display: block; font-size: 0.92rem; font-weight: 700; letter-spacing: 0.3px; }
+.nl-card-sub  { display: block; font-size: 0.75rem; opacity: 0.85; margin-top: 1px; }
+
+.nl-input-wrap {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  padding: 14px 14px 10px;
+  border-bottom: 1px solid var(--border);
+}
 
 .nl-textarea {
-  width: 100%;
-  padding: 10px 12px;
+  flex: 1;
+  padding: 11px 14px;
   border: 1.5px solid var(--border);
-  border-radius: 8px;
-  background: var(--surface);
+  border-right: none;
+  border-radius: 10px 0 0 10px;
+  background: var(--surface2);
   color: var(--text);
   font-size: 0.88rem;
   font-family: var(--font);
-  resize: vertical;
-  min-height: 62px;
+  resize: none;
   line-height: 1.6;
   transition: border-color var(--transition), box-shadow var(--transition);
-  margin-bottom: 10px;
+  min-height: 66px;
 }
 .nl-textarea:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(26,86,219,0.1);
-}
-
-.nl-actions {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
+  box-shadow: -3px 0 0 0 rgba(26,86,219,0.15);
+  z-index: 1;
 }
 
 .btn-convert {
-  background: linear-gradient(135deg, var(--primary), var(--accent));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  background: linear-gradient(170deg, var(--primary) 0%, var(--accent) 100%);
   color: #fff;
   border: none;
-  border-radius: 8px;
-  padding: 8px 18px;
-  font-size: 0.88rem;
+  border-radius: 0 10px 10px 0;
+  padding: 0 18px;
   font-weight: 700;
   cursor: pointer;
   transition: all var(--transition);
-  letter-spacing: 0.3px;
-  white-space: nowrap;
   flex-shrink: 0;
+  min-width: 80px;
 }
-.btn-convert:hover { opacity: 0.88; transform: translateY(-1px); box-shadow: 0 4px 14px rgba(26,86,219,0.3); }
-.btn-convert:active { transform: translateY(0); }
+.btn-convert-arrow { font-size: 1.2rem; line-height: 1; }
+.btn-convert span:last-child { font-size: 0.72rem; letter-spacing: 0.5px; text-transform: uppercase; }
+.btn-convert:hover { filter: brightness(1.12); transform: scale(1.03); }
+.btn-convert:active { transform: scale(0.98); }
 
-.nl-result {
+/* Example chips */
+.nl-chips-row {
   display: flex;
   align-items: center;
-  gap: 8px;
   flex-wrap: wrap;
-  animation: fadeIn 0.2s ease;
+  gap: 7px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
 }
-.nl-result-label {
+.nl-chips-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-light);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  flex-shrink: 0;
+  margin-right: 2px;
+}
+.nl-chip {
+  background: var(--primary-light);
+  border: 1.5px solid rgba(26,86,219,0.2);
+  color: var(--primary);
+  border-radius: 20px;
+  padding: 4px 12px;
   font-size: 0.78rem;
   font-weight: 600;
-  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+  font-family: var(--font);
 }
-.nl-result-expr {
+.nl-chip:hover {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 10px rgba(26,86,219,0.25);
+}
+.nl-chip:active { transform: translateY(0); }
+
+/* Preview bar */
+.nl-preview-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  animation: fadeIn 0.2s ease;
+}
+.nl-preview-icon { font-size: 1rem; flex-shrink: 0; }
+.nl-preview-text {
   font-family: var(--font-mono);
-  font-size: 0.88rem;
-  font-weight: 700;
-  color: var(--success);
-  background: rgba(16,185,129,0.1);
-  border: 1px solid rgba(16,185,129,0.3);
-  border-radius: 6px;
-  padding: 3px 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text);
+  flex: 1;
+  word-break: break-all;
 }
-.nl-result-expr.error { color: var(--error); background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.3); }
+.nl-preview-bar.ok   { background: rgba(16,185,129,0.07); }
+.nl-preview-bar.err  { background: rgba(239,68,68,0.07);  }
+.nl-preview-bar.ok  .nl-preview-icon { color: var(--success); }
+.nl-preview-bar.err .nl-preview-icon { color: var(--error);   }
+.nl-preview-bar.ok  .nl-preview-text { color: var(--success); }
+.nl-preview-bar.err .nl-preview-text { color: var(--error);   }
 
 /* =============================================
    Print styles

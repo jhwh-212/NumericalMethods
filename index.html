@@ -123,20 +123,38 @@
 
             <!-- Integration inputs -->
             <div id="integrationInputs" class="input-group-set" style="display:none;">
-              <!-- Natural Language Smart Input -->
-              <div class="nl-section" id="nlSection">
-                <div class="nl-header">
-                  <span class="nl-spark">✨</span>
-                  <span>Describe in plain English — I'll convert it</span>
-                </div>
-                <textarea id="nlInput" class="nl-textarea" rows="2"
-                  placeholder="e.g. integral from 0 to 4 (2x pow2 plus 5x minus 10)&#10;e.g. sin of x plus 3x squared from 0 to pi&#10;e.g. e to the x minus x cubed plus 2"></textarea>
-                <div class="nl-actions">
-                  <button type="button" class="btn-convert" id="nlConvertBtn">⟶ Convert</button>
-                  <div class="nl-result" id="nlResult" style="display:none;">
-                    <span class="nl-result-label">Understood:</span>
-                    <span class="nl-result-expr" id="nlResultExpr"></span>
+              <!-- Smart Natural Language Input -->
+              <div class="nl-card" id="nlSection">
+                <div class="nl-card-header">
+                  <div class="nl-card-icon">✨</div>
+                  <div class="nl-card-title">
+                    <span class="nl-card-name">Smart Input</span>
+                    <span class="nl-card-sub">Describe your function in plain English</span>
                   </div>
+                </div>
+
+                <div class="nl-input-wrap">
+                  <textarea id="nlInput" class="nl-textarea" rows="2" spellcheck="false"
+                    placeholder="e.g.  2x pow2 plus 5x minus 10 from 0 to 4&#10;e.g.  sin of x plus x squared from 0 to pi&#10;e.g.  e to the x minus cube root of x"></textarea>
+                  <button type="button" class="btn-convert" id="nlConvertBtn" title="Press Enter or click">
+                    <span class="btn-convert-arrow">⟶</span>
+                    <span>Convert</span>
+                  </button>
+                </div>
+
+                <div class="nl-chips-row">
+                  <span class="nl-chips-label">Try an example:</span>
+                  <button class="nl-chip" data-nl="2x pow2 plus 5x minus 10 from 0 to 4">2x²+5x−10</button>
+                  <button class="nl-chip" data-nl="sin of x from 0 to pi">sin(x)</button>
+                  <button class="nl-chip" data-nl="e to the x minus x squared from 0 to 2">eˣ−x²</button>
+                  <button class="nl-chip" data-nl="square root of x times cos of x from 1 to 4">√x·cos(x)</button>
+                  <button class="nl-chip" data-nl="x cubed minus 3x plus 1 from -2 to 2">x³−3x+1</button>
+                  <button class="nl-chip" data-nl="ln of x plus 2x from 1 to 5">ln(x)+2x</button>
+                </div>
+
+                <div class="nl-preview-bar" id="nlPreviewBar" style="display:none;">
+                  <span class="nl-preview-icon" id="nlPreviewIcon">✓</span>
+                  <span class="nl-preview-text" id="nlPreviewText"></span>
                 </div>
               </div>
 
@@ -144,7 +162,7 @@
               <div class="input-group">
                 <label for="funcInput">f(x) — math expression</label>
                 <input type="text" id="funcInput" placeholder="e.g. 2*x^2 + 5*x - 10" autocomplete="off" spellcheck="false" />
-                <small class="hint">Operators: ^ * / + −  &nbsp;|&nbsp; Functions: sin(x) cos(x) sqrt(x) exp(x) ln(x) log(x) abs(x)  &nbsp;|&nbsp; Constants: pi  e</small>
+                <small class="hint">sin(x) &nbsp;cos(x) &nbsp;sqrt(x) &nbsp;exp(x) &nbsp;ln(x) &nbsp;log(x) &nbsp;abs(x) &nbsp;pi &nbsp;e &nbsp;x^2 &nbsp;x^n</small>
               </div>
               <div class="input-row">
                 <div class="input-group">
