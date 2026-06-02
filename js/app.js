@@ -395,12 +395,15 @@
 
   function showNLPreview(expr, a, b, valid) {
     nlPreviewBar.style.display = 'flex';
-    nlPreviewBar.className = 'nl-preview-bar ' + (valid ? 'ok' : 'err');
-    nlPreviewIcon.textContent = valid ? '✓' : '⚠';
+    const boundsFound = a !== '' && b !== '';
+    const state = !valid ? 'err' : !boundsFound ? 'hint' : 'ok';
+    nlPreviewBar.className = 'nl-preview-bar ' + state;
+    nlPreviewIcon.textContent = state === 'ok' ? '✓' : state === 'hint' ? 'ℹ' : '⚠';
     let msg = 'f(x) = ' + expr;
     if (a) msg += '   a = ' + a;
     if (b) msg += '   b = ' + b;
-    if (!valid) msg += '   — expression may need adjustment';
+    if (!valid)       msg += '   — check your expression';
+    else if (!boundsFound) msg += '   — fill in bounds a and b below, or add "from X to Y" to your text';
     nlPreviewText.textContent = msg;
   }
 

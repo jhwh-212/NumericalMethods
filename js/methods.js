@@ -10,7 +10,11 @@ const NM = {};
 NM.parseNL = function(raw) {
   let s = raw.trim().toLowerCase();
 
-  // ── 1. Extract bounds ("from 0 to 4", "from -1 to pi") ─────────────
+  // ── 0. Pre-normalize Python/JS power syntax & shorthand ─────────────
+  s = s.replace(/\*\*/g, '^');          // 2**x  → 2^x
+  s = s.replace(/\^{2,}/g, '^');        // ^^    → ^
+
+  // ── 1. Extract bounds — only when "from X to Y" is present ──────────
   let a = '', b = '';
   const bm = s.match(/\bfrom\s+([-+]?[\d.]+|pi|e|tau)\s+to\s+([-+]?[\d.]+|pi|e|tau)\b/);
   if (bm) { a = bm[1]; b = bm[2]; s = s.slice(0, bm.index) + s.slice(bm.index + bm[0].length); }
@@ -55,10 +59,11 @@ NM.parseNL = function(raw) {
     [/\bln\b/g,'ln('],      [/\blog\b/g,'log('],
     [/\bexp\b/g,'exp('],    [/\babs\b/g,'abs('],
     [/\bceil\b/g,'ceil('],  [/\bfloor\b/g,'floor('],
-    // Powers
+    // Powers — handle numeric AND variable exponents: pow2, pow x, powx, pow(x+1)
     [/\bto\s+the\s+([\d]+)(?:st|nd|rd|th)?\b/g, '^$1'],
     [/\bsquared\b/g,'^2'],  [/\bcubed\b/g,'^3'],
-    [/pow(?:er)?\s*(\d+)/g, '^$1'],
+    [/pow(?:er)?\s*\(([^)]+)\)/g, '^($1)'],   // pow(x+1) → ^(x+1)
+    [/pow(?:er)?\s*([a-z0-9.]+)/g, '^$1'],    // pow2 powx pow 3.5 → ^2 ^x ^3.5
     // Arithmetic words
     [/\bplus\b/g,'+'],  [/\bminus\b/g,'-'],
     [/\btimes\b/g,'*'], [/\bover\b/g,'/'],
@@ -116,7 +121,7 @@ NM.validateFn = function(expr) {
 NM.trapezoidal = function({ expr, a, b, n }) {
   NM.validateFn(expr);
   a = +a; b = +b; n = Math.round(+n);
-  if (isNaN(a) || isNaN(b)) throw new Error('Bounds a and b must be numbers.');
+  if (!a && a !== 0 || !b && b !== 0 || isNaN(+a) || isNaN(+b)) throw new Error('Enter bounds a and b — or include "from X to Y" in your smart input.');
   if (a >= b) throw new Error('Lower bound a must be less than upper bound b.');
   if (n < 1) throw new Error('Number of intervals n must be at least 1.');
 
@@ -159,7 +164,7 @@ NM.trapezoidal = function({ expr, a, b, n }) {
 NM.simpson = function({ expr, a, b, n }) {
   NM.validateFn(expr);
   a = +a; b = +b; n = Math.round(+n);
-  if (isNaN(a) || isNaN(b)) throw new Error('Bounds must be numbers.');
+  if (!a && a !== 0 || !b && b !== 0 || isNaN(+a) || isNaN(+b)) throw new Error('Enter bounds a and b — or include "from X to Y" in your smart input.');
   if (a >= b) throw new Error('Lower bound a must be less than upper bound b.');
   if (n < 2) throw new Error('n must be at least 2.');
   if (n % 2 !== 0) throw new Error('n must be even for Simpson\'s 1/3 Rule.');
@@ -209,7 +214,7 @@ NM.simpson = function({ expr, a, b, n }) {
 NM.richardson = function({ expr, a, b, n }) {
   NM.validateFn(expr);
   a = +a; b = +b; n = Math.round(+n);
-  if (isNaN(a) || isNaN(b)) throw new Error('Bounds must be numbers.');
+  if (!a && a !== 0 || !b && b !== 0 || isNaN(+a) || isNaN(+b)) throw new Error('Enter bounds a and b — or include "from X to Y" in your smart input.');
   if (a >= b) throw new Error('Lower bound a must be less than upper bound b.');
   if (n < 2) throw new Error('n must be at least 2.');
 
@@ -257,7 +262,7 @@ NM.richardson = function({ expr, a, b, n }) {
 NM.gaussLegendre = function({ expr, a, b, n }) {
   NM.validateFn(expr);
   a = +a; b = +b; n = +n;
-  if (isNaN(a) || isNaN(b)) throw new Error('Bounds must be numbers.');
+  if (!a && a !== 0 || !b && b !== 0 || isNaN(+a) || isNaN(+b)) throw new Error('Enter bounds a and b — or include "from X to Y" in your smart input.');
   if (a >= b) throw new Error('Lower bound a must be less than upper bound b.');
 
   // Nodes and weights for [-1,1]

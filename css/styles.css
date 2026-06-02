@@ -712,10 +712,13 @@ a { text-decoration: none; color: inherit; }
 }
 .nl-preview-bar.ok   { background: rgba(16,185,129,0.07); }
 .nl-preview-bar.err  { background: rgba(239,68,68,0.07);  }
+.nl-preview-bar.hint { background: rgba(245,158,11,0.07); }
 .nl-preview-bar.ok  .nl-preview-icon { color: var(--success); }
 .nl-preview-bar.err .nl-preview-icon { color: var(--error);   }
+.nl-preview-bar.hint .nl-preview-icon { color: var(--warning);}
 .nl-preview-bar.ok  .nl-preview-text { color: var(--success); }
 .nl-preview-bar.err .nl-preview-text { color: var(--error);   }
+.nl-preview-bar.hint .nl-preview-text { color: var(--warning);}
 
 /* =============================================
    Print styles
