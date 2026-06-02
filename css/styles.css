@@ -376,9 +376,40 @@ a { text-decoration: none; color: inherit; }
    Form Controls
    ============================================= */
 .input-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
-.input-group label {
-  font-size: 0.88rem; font-weight: 600; color: var(--text-muted);
-  display: flex; align-items: center; justify-content: space-between;
+.input-group label { font-size: 0.88rem; font-weight: 600; color: var(--text-muted); }
+
+.func-input-wrap {
+  display: flex;
+  gap: 0;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+.func-input-wrap:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(26,86,219,0.12);
+}
+.func-input-wrap input {
+  flex: 1;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background: var(--surface2);
+  padding: 10px 14px;
+  color: var(--text);
+  font-size: 0.93rem;
+  font-family: var(--font-mono);
+  outline: none;
+}
+.func-input-wrap .kbd-toggle-btn {
+  border-radius: 0;
+  border: none;
+  border-left: 1.5px solid var(--border);
+  padding: 0 14px;
+  font-size: 0.82rem;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 .input-group input, .input-group select {
   padding: 10px 14px;

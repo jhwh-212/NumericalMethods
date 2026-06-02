@@ -124,13 +124,11 @@
             <!-- Integration inputs -->
             <div id="integrationInputs" class="input-group-set" style="display:none;">
               <div class="input-group">
-                <label for="funcInput">
-                  Function f(x)
-                  <button type="button" class="kbd-toggle-btn" id="kbdToggle" title="Open math keyboard">
-                    ⌨ Keyboard
-                  </button>
-                </label>
-                <input type="text" id="funcInput" placeholder="e.g. x^3 + 2*x - 1" autocomplete="off" spellcheck="false" />
+                <label for="funcInput">Function f(x)</label>
+                <div class="func-input-wrap">
+                  <input type="text" id="funcInput" placeholder="e.g. x^3 + 2*x - 1" autocomplete="off" spellcheck="false" />
+                  <button type="button" class="kbd-toggle-btn" id="kbdToggle" title="Open math keyboard">⌨ Keyboard</button>
+                </div>
                 <small class="hint">Use: x^2, sin(x), cos(x), exp(x), log(x), sqrt(x), pi, e</small>
               </div>
 
