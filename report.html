@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>MAT 315 – Numerical Methods Project Report</title>
+<style>
+  @page {
+    size: A4;
+    margin: 20mm;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 14pt;
+    line-height: 1.5;
+    color: #000;
+    background: #fff;
+  }
+
+  /* ── Page breaks ── */
+  .page { page-break-after: always; }
+  .no-break { page-break-inside: avoid; }
+
+  /* ── Cover Page ── */
+  .cover {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 257mm;
+    text-align: center;
+    padding: 0 10mm;
+  }
+  .cover-logos {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 20mm;
+  }
+  .cover-logos img { width: 28mm; height: 28mm; object-fit: contain; }
+  .cover h1 { font-size: 18pt; font-weight: bold; margin-bottom: 6pt; }
+  .cover h2 { font-size: 16pt; font-weight: bold; margin-bottom: 6pt; }
+  .cover h3 { font-size: 15pt; font-weight: bold; margin-bottom: 6pt; }
+  .cover-title {
+    font-size: 17pt;
+    font-weight: bold;
+    text-decoration: underline;
+    margin: 14pt 0;
+  }
+  .cover-sub { font-size: 14pt; margin: 6pt 0; }
+  .cover-info { margin-top: 24mm; font-size: 14pt; line-height: 2; }
+
+  /* ── TOC ── */
+  .toc-title {
+    font-size: 16pt;
+    font-weight: bold;
+    text-align: center;
+    text-decoration: underline;
+    margin-bottom: 18pt;
+  }
+  .toc-entry {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6pt;
+    font-size: 14pt;
+  }
+  .toc-entry .dots {
+    flex: 1;
+    border-bottom: 1px dotted #000;
+    margin: 0 4pt;
+    position: relative;
+    top: -4pt;
+  }
+
+  /* ── Section headings ── */
+  .section-title {
+    font-size: 16pt;
+    font-weight: bold;
+    text-decoration: underline;
+    margin: 18pt 0 10pt 0;
+  }
+  .sub-title {
+    font-size: 15pt;
+    font-weight: bold;
+    margin: 14pt 0 8pt 0;
+  }
+  .sub-sub-title {
+    font-size: 14pt;
+    font-weight: bold;
+    font-style: italic;
+    margin: 10pt 0 6pt 0;
+  }
+
+  /* ── Body text ── */
+  p {
+    text-align: justify;
+    margin-bottom: 10pt;
+    font-size: 14pt;
+    line-height: 1.5;
+  }
+
+  /* ── Formula blocks ── */
+  .formula {
+    text-align: center;
+    font-style: italic;
+    margin: 10pt 20pt;
+    font-size: 14pt;
+  }
+
+  /* ── Lists ── */
+  ul, ol {
+    margin: 8pt 0 8pt 20pt;
+    font-size: 14pt;
+    line-height: 1.5;
+  }
+  li { margin-bottom: 4pt; text-align: justify; }
+
+  /* ── References ── */
+  .ref-entry {
+    font-size: 14pt;
+    line-height: 1.5;
+    margin-bottom: 8pt;
+    text-align: justify;
+    padding-left: 20pt;
+    text-indent: -20pt;
+  }
+
+  /* ── Code block ── */
+  .code-block {
+    font-family: 'Courier New', monospace;
+    font-size: 11pt;
+    background: #f5f5f5;
+    border: 1px solid #ccc;
+    padding: 10pt 14pt;
+    margin: 10pt 0;
+    line-height: 1.4;
+    white-space: pre;
+    page-break-inside: avoid;
+  }
+
+  /* ── Print ── */
+  @media print {
+    body { font-size: 14pt; }
+    .cover { min-height: 257mm; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════ COVER PAGE -->
+<div class="cover page">
+  <div class="cover-logos">
+    <div style="width:28mm;height:28mm;border:1px solid #ccc;display:flex;align-items:center;justify-content:center;font-size:8pt;text-align:center;">AUST<br>Logo</div>
+    <div style="width:28mm;height:28mm;border:1px solid #ccc;display:flex;align-items:center;justify-content:center;font-size:8pt;text-align:center;">Faculty<br>Logo</div>
+  </div>
+
+  <h1>American University of Science and Technology</h1>
+  <h2>Faculty of Engineering</h2>
+  <h2>Department of Mathematics</h2>
+  <div class="cover-title">MAT 315 – Applied Numerical Methods</div>
+  <div class="cover-title">Project Report – Spring 2026</div>
+
+  <div style="margin-top:16mm; font-size:15pt; font-weight:bold;">
+    Numerical Integration and Interpolation Methods:<br>
+    A Computational Approach
+  </div>
+
+  <div class="cover-info">
+    <div><strong>Submitted by:</strong> Joelle</div>
+    <div><strong>Submitted to:</strong> Department of Mathematics</div>
+    <div><strong>Course:</strong> MAT 315 – Applied Numerical Methods</div>
+    <div><strong>Date:</strong> June 2026</div>
+    <div style="margin-top:10pt;"><strong>Project Website:</strong><br>
+      https://jhwh-212.github.io/NumericalMethods/</div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════ TABLE OF CONTENTS -->
+<div class="page" style="padding-top:10mm;">
+  <div class="toc-title">Table of Contents</div>
+
+  <div class="toc-entry"><span>1. Introduction</span><span class="dots"></span><span>3</span></div>
+  <div class="toc-entry"><span>2. Importance of Numerical Methods in Computer Programming</span><span class="dots"></span><span>4</span></div>
+  <div class="toc-entry"><span>3. Selected Topic: Numerical Integration and Interpolation</span><span class="dots"></span><span>5</span></div>
+  <div class="toc-entry" style="padding-left:16pt;"><span>3.1 Trapezoidal Rule</span><span class="dots"></span><span>5</span></div>
+  <div class="toc-entry" style="padding-left:16pt;"><span>3.2 Simpson's 1/3 Rule</span><span class="dots"></span><span>6</span></div>
+  <div class="toc-entry" style="padding-left:16pt;"><span>3.3 Richardson Extrapolation</span><span class="dots"></span><span>6</span></div>
+  <div class="toc-entry" style="padding-left:16pt;"><span>3.4 Gauss-Legendre Quadrature</span><span class="dots"></span><span>7</span></div>
+  <div class="toc-entry" style="padding-left:16pt;"><span>3.5 Lagrange Interpolation</span><span class="dots"></span><span>7</span></div>
+  <div class="toc-entry" style="padding-left:16pt;"><span>3.6 Newton Divided Difference Interpolation</span><span class="dots"></span><span>8</span></div>
+  <div class="toc-entry"><span>4. Part 2 – Web-Based Numerical Methods Calculator</span><span class="dots"></span><span>8</span></div>
+  <div class="toc-entry" style="padding-left:16pt;"><span>4.1 Technologies Used</span><span class="dots"></span><span>9</span></div>
+  <div class="toc-entry" style="padding-left:16pt;"><span>4.2 Application Structure and Code Explanation</span><span class="dots"></span><span>9</span></div>
+  <div class="toc-entry" style="padding-left:16pt;"><span>4.3 Code Sample – Trapezoidal Rule</span><span class="dots"></span><span>10</span></div>
+  <div class="toc-entry"><span>5. Conclusion</span><span class="dots"></span><span>11</span></div>
+  <div class="toc-entry"><span>6. References</span><span class="dots"></span><span>11</span></div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════ SECTION 1 – INTRODUCTION -->
+<div class="page">
+  <div class="section-title">1. Introduction</div>
+
+  <p>
+    Mathematics has always served as the foundation of engineering and scientific disciplines. However,
+    many real-world problems involve equations and integrals that cannot be solved analytically in a
+    closed form. This is where numerical methods become essential. Numerical methods are systematic
+    techniques that use arithmetic operations to approximate solutions to mathematical problems, making
+    it possible to solve complex equations that would otherwise be intractable.
+  </p>
+
+  <p>
+    In the modern era, the use of computer programming to implement numerical methods has
+    revolutionized how engineers, mathematicians, and scientists solve problems. Instead of performing
+    thousands of manual arithmetic steps, a computer can execute the same calculations in milliseconds
+    with high precision. This synergy between numerical mathematics and programming has given rise to
+    a broad class of computational tools used in fields ranging from aerospace engineering and structural
+    analysis to medical imaging and financial modeling.
+  </p>
+
+  <p>
+    This project focuses on the topic of <strong>Numerical Integration and Polynomial Interpolation</strong>,
+    two of the most fundamental and widely applied areas in numerical analysis. Numerical integration —
+    also called numerical quadrature — provides methods to compute definite integrals when exact
+    antiderivatives are unknown or difficult to evaluate. Polynomial interpolation, on the other hand,
+    constructs a continuous function that passes through a given set of discrete data points, enabling
+    prediction and approximation between known values.
+  </p>
+
+  <p>
+    The project is organized into two parts. Part 1 provides a theoretical discussion of the importance
+    of numerical methods and presents six specific methods: the Trapezoidal Rule, Simpson's 1/3 Rule,
+    Richardson Extrapolation, Gauss-Legendre Quadrature, Lagrange Interpolation, and Newton's
+    Divided Difference method. Part 2 presents a fully functional web-based calculator application
+    developed using HTML, CSS, and JavaScript that implements all six methods with step-by-step
+    solutions and interactive visualizations.
+  </p>
+</div>
+
+
+<!-- ═══════════════════════════════════════════ SECTION 2 – IMPORTANCE -->
+<div class="page">
+  <div class="section-title">2. Importance of Numerical Methods in Computer Programming</div>
+
+  <p>
+    Numerical methods provide practical computational techniques to solve mathematical problems that
+    arise in engineering, science, and technology. Their importance grows directly from a fundamental
+    limitation: the vast majority of real-world mathematical models — differential equations describing
+    fluid dynamics, integral equations modeling heat transfer, nonlinear systems representing electrical
+    circuits — have no exact analytical solutions. Numerical methods bridge this gap by transforming
+    continuous mathematical problems into discrete, computable forms.
+  </p>
+
+  <p>
+    Computer programming amplifies the power of numerical methods dramatically. A method such as
+    Gaussian elimination, which might require hours of manual computation for a 50×50 linear system,
+    can be executed in microseconds by a properly written program. This combination of mathematical
+    rigor and computational speed makes numerical methods indispensable across multiple disciplines:
+  </p>
+
+  <ul>
+    <li><strong>Structural Engineering:</strong> Finite element analysis uses numerical methods to solve
+    systems of thousands of equations to predict stress and deformation in bridges, buildings, and aircraft.</li>
+
+    <li><strong>Fluid Dynamics:</strong> Computational fluid dynamics (CFD) relies on numerical solutions
+    of the Navier-Stokes equations to simulate airflow, water currents, and heat distribution.</li>
+
+    <li><strong>Signal Processing:</strong> The Fast Fourier Transform (FFT), a numerical algorithm, enables
+    real-time audio processing, image compression (JPEG), and telecommunications.</li>
+
+    <li><strong>Medical Imaging:</strong> MRI and CT scan reconstruction algorithms use numerical
+    integration and interpolation to convert sensor data into detailed internal images of the human body.</li>
+
+    <li><strong>Financial Modeling:</strong> Options pricing models (e.g., Black-Scholes) use numerical
+    methods to evaluate integrals that have no closed-form solutions for complex derivative instruments.</li>
+  </ul>
+
+  <p>
+    Beyond solving individual problems, numerical methods contribute to the development of efficient
+    algorithms that reduce computational cost, memory usage, and rounding errors. Concepts such as
+    truncation error, round-off error, and convergence rate are central to evaluating the quality of
+    a numerical algorithm. A well-designed numerical program must balance accuracy, stability, and
+    computational efficiency — goals that require both mathematical understanding and programming skill.
+  </p>
+
+  <p>
+    In summary, numerical methods are not merely academic exercises. They are the computational
+    backbone of modern engineering and science, and mastery of their implementation through programming
+    is an essential skill for any engineer working in a technology-driven environment.
+  </p>
+</div>
+
+
+<!-- ═══════════════════════════════════════════ SECTION 3 – SELECTED TOPIC -->
+<div class="page">
+  <div class="section-title">3. Selected Topic: Numerical Integration and Interpolation</div>
+
+  <p>
+    Numerical integration and interpolation are two closely related topics in numerical analysis. Integration
+    is concerned with computing the area under a curve — the definite integral — when the function may
+    not have a tractable antiderivative. Interpolation is concerned with constructing a smooth polynomial
+    that passes through a finite set of known data points, allowing estimation at intermediate values.
+    Both topics are indispensable in engineering practice and are widely implemented in software tools.
+  </p>
+
+  <!-- 3.1 -->
+  <div class="sub-title">3.1 Trapezoidal Rule</div>
+
+  <p>
+    The Trapezoidal Rule is the simplest and most intuitive method of numerical integration. It approximates
+    the area under a curve by dividing the interval [a, b] into n equal subintervals of width h = (b − a)/n
+    and approximating the curve over each subinterval by a straight line (trapezoid). The formula is:
+  </p>
+
+  <div class="formula">
+    T = (h/2) [f(x<sub>0</sub>) + 2f(x<sub>1</sub>) + 2f(x<sub>2</sub>) + ... + 2f(x<sub>n-1</sub>) + f(x<sub>n</sub>)]
+  </div>
+
+  <p>
+    The Trapezoidal Rule has a global truncation error of order O(h²), meaning that halving the step size
+    reduces the error by approximately a factor of four. It is straightforward to implement and serves as
+    the basis for more advanced methods.
+  </p>
+
+  <p>
+    <strong>Real-Life Example:</strong> In electrical engineering, the energy consumed by a device is
+    computed as E = ∫P(t) dt, where P(t) is the time-varying power. When P(t) is sampled at discrete
+    time intervals (as in smart meters), the Trapezoidal Rule is used to approximate the total energy
+    consumption from the measured data samples.
+  </p>
+
+  <!-- 3.2 -->
+  <div class="sub-title">3.2 Simpson's 1/3 Rule</div>
+
+  <p>
+    Simpson's 1/3 Rule improves upon the Trapezoidal Rule by fitting a parabola (second-degree polynomial)
+    through each pair of subintervals rather than a straight line. This requires n to be even. The formula is:
+  </p>
+
+  <div class="formula">
+    S = (h/3) [f(x<sub>0</sub>) + 4f(x<sub>1</sub>) + 2f(x<sub>2</sub>) + 4f(x<sub>3</sub>) + ... + 4f(x<sub>n-1</sub>) + f(x<sub>n</sub>)]
+  </div>
+
+  <p>
+    The error of Simpson's Rule is of order O(h⁴), making it significantly more accurate than the
+    Trapezoidal Rule for the same number of function evaluations. The alternating coefficients 4 and 2
+    arise from fitting parabolic arcs through three consecutive points.
+  </p>
+
+  <p>
+    <strong>Real-Life Example:</strong> In civil engineering, the cross-sectional area of a river or
+    irregular land parcel is computed by taking depth or elevation measurements at equally spaced intervals
+    and applying Simpson's Rule. Hydraulic engineers use this to estimate water flow rates and flood volumes.
+  </p>
+
+  <!-- 3.3 -->
+  <div class="sub-title">3.3 Richardson Extrapolation</div>
+
+  <p>
+    Richardson Extrapolation is a technique to increase the order of accuracy of any numerical method by
+    combining two estimates computed at different step sizes. Applied to the Trapezoidal Rule with step
+    sizes h and h/2, it yields a much more accurate result with virtually no additional computational cost:
+  </p>
+
+  <div class="formula">
+    R = [4·T(h/2) − T(h)] / 3
+  </div>
+
+  <p>
+    This formula effectively cancels the leading error term of order O(h²), resulting in an approximation
+    with error of order O(h⁴) — equivalent in accuracy to Simpson's Rule. Richardson Extrapolation is
+    a general technique applicable to any convergent numerical sequence and is the foundation of Romberg
+    Integration, a powerful adaptive method.
+  </p>
+
+  <p>
+    <strong>Real-Life Example:</strong> In computational physics, Richardson Extrapolation is used to
+    improve the accuracy of numerical derivatives and integrals in molecular dynamics simulations, where
+    the true solution is not known but higher accuracy is required without multiplying the computation time.
+  </p>
+</div>
+
+
+<!-- ═══════════════════════════════════════════ SECTION 3 continued -->
+<div class="page">
+
+  <!-- 3.4 -->
+  <div class="sub-title">3.4 Gauss-Legendre Quadrature</div>
+
+  <p>
+    Gauss-Legendre Quadrature is the most sophisticated integration method considered in this project.
+    Unlike the Trapezoidal and Simpson's Rules — which use equally spaced points — Gauss-Legendre
+    selects both the evaluation points (nodes) t<sub>i</sub> and the weights w<sub>i</sub> optimally
+    to maximize accuracy for a given number of function evaluations. The integral is transformed to the
+    standard interval [−1, 1] and approximated as:
+  </p>
+
+  <div class="formula">
+    I ≈ ((b−a)/2) Σ w<sub>i</sub> · f( ((b−a)/2)·t<sub>i</sub> + (b+a)/2 )
+  </div>
+
+  <p>
+    An n-point Gauss-Legendre formula integrates polynomials of degree up to 2n−1 exactly, making it
+    the most efficient method available for smooth functions. The nodes and weights are derived from
+    Legendre polynomials and are tabulated for various orders n.
+  </p>
+
+  <p>
+    <strong>Real-Life Example:</strong> In aerospace engineering, aerodynamic lift and drag are computed
+    as surface integrals over complex wing geometries. Gauss-Legendre Quadrature is used in panel methods
+    to evaluate these integrals efficiently, reducing the number of function evaluations needed compared
+    to simpler methods while maintaining high accuracy.
+  </p>
+
+  <!-- 3.5 -->
+  <div class="sub-title">3.5 Lagrange Interpolation</div>
+
+  <p>
+    Lagrange Interpolation constructs a polynomial P(x) of degree n−1 that passes exactly through n
+    given data points (x<sub>0</sub>, y<sub>0</sub>), ..., (x<sub>n-1</sub>, y<sub>n-1</sub>). The
+    polynomial is expressed as a linear combination of basis polynomials L<sub>k</sub>(x):
+  </p>
+
+  <div class="formula">
+    P(x) = Σ y<sub>k</sub> L<sub>k</sub>(x),&nbsp;&nbsp;&nbsp;
+    L<sub>k</sub>(x) = Π<sub>j≠k</sub> (x − x<sub>j</sub>) / (x<sub>k</sub> − x<sub>j</sub>)
+  </div>
+
+  <p>
+    Each basis polynomial L<sub>k</sub>(x) equals 1 at x = x<sub>k</sub> and 0 at all other data points,
+    ensuring that the interpolant passes through all given data. The method is explicit and requires no
+    solving of linear systems, but adding a new data point requires recomputing all basis polynomials.
+  </p>
+
+  <p>
+    <strong>Real-Life Example:</strong> In meteorology, temperature measurements are recorded at specific
+    weather stations at discrete geographic locations. Lagrange Interpolation is used to estimate
+    temperature at locations between stations, enabling continuous weather maps from discrete sensor data.
+  </p>
+
+  <!-- 3.6 -->
+  <div class="sub-title">3.6 Newton Divided Difference Interpolation</div>
+
+  <p>
+    Newton's Divided Difference method constructs the interpolating polynomial incrementally using a
+    table of divided differences. The polynomial takes the compact form:
+  </p>
+
+  <div class="formula">
+    P(x) = f[x<sub>0</sub>] + f[x<sub>0</sub>,x<sub>1</sub>](x−x<sub>0</sub>) +
+    f[x<sub>0</sub>,x<sub>1</sub>,x<sub>2</sub>](x−x<sub>0</sub>)(x−x<sub>1</sub>) + …
+  </div>
+
+  <p>
+    where f[x<sub>0</sub>, ..., x<sub>k</sub>] denotes the k-th order divided difference. This
+    formulation is computationally efficient because adding a new data point only requires computing one
+    new column in the divided difference table, unlike Lagrange which requires full recomputation.
+    Evaluation of the polynomial is performed efficiently using Horner's method.
+  </p>
+
+  <p>
+    <strong>Real-Life Example:</strong> In robotics, the trajectory of a robotic arm must pass through a
+    sequence of precise waypoints in space. Newton Interpolation is used to compute a smooth polynomial
+    path through the waypoints, which is then followed by the robot's motion controller to achieve
+    accurate and smooth movement.
+  </p>
+</div>
+
+
+<!-- ═══════════════════════════════════════════ SECTION 4 – PART 2 CODE -->
+<div class="page">
+  <div class="section-title">4. Part 2 – Web-Based Numerical Methods Calculator</div>
+
+  <p>
+    For Part 2 of this project, a fully functional web-based calculator was developed that implements
+    all six numerical methods discussed above. The application is accessible online at:
+  </p>
+
+  <p style="text-align:center; font-weight:bold;">
+    https://jhwh-212.github.io/NumericalMethods/
+  </p>
+
+  <p>
+    The calculator provides a complete interactive environment where users can select any of the six
+    methods, enter input parameters, and receive step-by-step mathematical solutions with an interactive
+    graph. The application also includes a Smart Input feature that converts plain English descriptions
+    of mathematical functions into valid expressions (e.g., "sin of x plus x squared from 0 to pi" is
+    automatically converted to sin(x)+x^2 with bounds a=0, b=π).
+  </p>
+
+  <!-- 4.1 -->
+  <div class="sub-title">4.1 Technologies Used</div>
+
+  <ul>
+    <li><strong>HTML5</strong> — Semantic page structure, form inputs, and layout</li>
+    <li><strong>CSS3</strong> — Responsive design, dark/light theme, animations, custom properties</li>
+    <li><strong>JavaScript (ES6+)</strong> — All application logic, method implementations, and UI control</li>
+    <li><strong>Math.js</strong> — Safe evaluation of user-entered mathematical expressions (e.g., sin(x), x^2)</li>
+    <li><strong>Plotly.js</strong> — Interactive graphs with zoom, pan, hover, and PNG export</li>
+    <li><strong>MathJax 3</strong> — Rendering of LaTeX formulas in the browser</li>
+    <li><strong>GitHub Pages</strong> — Free hosting of the static web application</li>
+  </ul>
+
+  <!-- 4.2 -->
+  <div class="sub-title">4.2 Application Structure and Code Explanation</div>
+
+  <p>The project is organized into four files:</p>
+
+  <ul>
+    <li><strong>index.html</strong> — The main page containing the sidebar navigation, hero landing page,
+    calculator panel with all input fields, and result/graph containers.</li>
+
+    <li><strong>css/styles.css</strong> — All visual styling including the dark/light theme, responsive
+    sidebar, card components, and the Smart Input section.</li>
+
+    <li><strong>js/methods.js</strong> — The mathematical core of the application. Contains:
+      <ul>
+        <li>NM.parseNL() — the natural language to math expression parser</li>
+        <li>NM.trapezoidal() — Trapezoidal Rule implementation</li>
+        <li>NM.simpson() — Simpson's 1/3 Rule implementation</li>
+        <li>NM.richardson() — Richardson Extrapolation implementation</li>
+        <li>NM.gaussLegendre() — Gauss-Legendre Quadrature implementation</li>
+        <li>NM.lagrange() — Lagrange Interpolation implementation</li>
+        <li>NM.newton() — Newton Divided Difference implementation</li>
+      </ul>
+    </li>
+
+    <li><strong>js/charts.js</strong> — Builds Plotly.js visualizations for each method type, including
+    shaded trapezoids, Simpson parabolic panels, and interpolation polynomial curves.</li>
+
+    <li><strong>js/app.js</strong> — The UI controller that reads user inputs, calls the appropriate
+    method, renders step-by-step results, and manages the Smart Input conversion.</li>
+  </ul>
+
+  <!-- 4.3 -->
+  <div class="sub-title">4.3 Code Sample – Trapezoidal Rule (js/methods.js)</div>
+
+  <p>
+    The following code shows the exact implementation of the Trapezoidal Rule. The function receives
+    the expression string, bounds a and b, and number of intervals n. It evaluates f(x) at each node
+    using Math.js, applies the formula, and returns the result along with step-by-step data.
+  </p>
+
+<div class="code-block">NM.trapezoidal = function({ expr, a, b, n }) {
+
+  // Step 1: Validate inputs
+  NM.validateFn(expr);
+  a = +a;  b = +b;  n = Math.round(+n);
+
+  // Step 2: Compute step size h
+  const h = (b - a) / n;
+
+  // Step 3: Generate x-nodes: x0, x1, x2, ..., xn
+  const xs = Array.from({ length: n + 1 }, (_, i) => a + i * h);
+
+  // Step 4: Evaluate f(x) at each node using Math.js
+  const ys = xs.map(x => NM.evalFn(expr, x));
+  //  NM.evalFn calls: math.evaluate(expr, { x })
+  //  e.g. expr = "x^2 + 1", x = 2  →  returns 5
+
+  // Step 5: Apply Trapezoidal formula
+  //  T = (h/2)[f(x0) + 2*f(x1) + ... + 2*f(xn-1) + f(xn)]
+  const innerSum = ys.slice(1, n).reduce((s, v) => s + v, 0);
+  const sum      = ys[0] + 2 * innerSum + ys[n];
+  const result   = (h / 2) * sum;
+
+  return { result, xs, ys, h, n, a, b };
+};</div>
+
+  <p>
+    The function <code>NM.evalFn(expr, x)</code> calls Math.js to safely evaluate any expression
+    the user typed — whether it is x^2 + 1, sin(x)*exp(-x), or any other valid function. This
+    eliminates the need to hard-code specific functions and allows the calculator to handle arbitrary
+    user-defined expressions.
+  </p>
+</div>
+
+
+<!-- ═══════════════════════════════════════════ SECTION 5 – CONCLUSION -->
+<div class="page">
+  <div class="section-title">5. Conclusion</div>
+
+  <p>
+    This project has demonstrated the importance and practical implementation of numerical methods
+    in both theoretical and applied contexts. Through the study of six numerical methods — Trapezoidal
+    Rule, Simpson's 1/3 Rule, Richardson Extrapolation, Gauss-Legendre Quadrature, Lagrange
+    Interpolation, and Newton Divided Difference — it is clear that numerical analysis provides
+    essential tools for solving mathematical problems that cannot be resolved analytically.
+  </p>
+
+  <p>
+    The progression from the Trapezoidal Rule to Gauss-Legendre Quadrature illustrates a fundamental
+    principle in numerical computing: by investing more mathematical sophistication in the design of
+    an algorithm, we can achieve dramatically higher accuracy with fewer function evaluations. Similarly,
+    the comparison between Lagrange and Newton interpolation shows that equivalent mathematical results
+    can be achieved through structurally different algorithms, each with its own computational advantages.
+  </p>
+
+  <p>
+    The web-based calculator developed for Part 2 of this project brings these methods to life in an
+    accessible and educational format. By implementing all six methods in JavaScript using Math.js for
+    expression evaluation and Plotly.js for visualization, the application allows users to explore
+    numerical concepts interactively. The Smart Input feature further reduces the barrier to entry by
+    allowing users to describe mathematical functions in plain English, which the application then
+    translates into valid mathematical expressions automatically.
+  </p>
+
+  <p>
+    This project reinforces the conclusion that numerical methods are not isolated mathematical tools
+    but rather a connected ecosystem of techniques, each suited to particular problem types and accuracy
+    requirements. Their implementation through modern programming languages makes them accessible,
+    scalable, and applicable to real engineering problems of virtually unlimited complexity.
+  </p>
+
+  <!-- ─── REFERENCES ─── -->
+  <div class="section-title" style="margin-top:20pt;">6. References</div>
+
+  <div class="ref-entry">
+    [1] Chapra, S. C., &amp; Canale, R. P. (2015). <em>Numerical Methods for Engineers</em> (7th ed.).
+    McGraw-Hill Education.
+  </div>
+
+  <div class="ref-entry">
+    [2] Burden, R. L., &amp; Faires, J. D. (2011). <em>Numerical Analysis</em> (9th ed.).
+    Brooks/Cole, Cengage Learning.
+  </div>
+
+  <div class="ref-entry">
+    [3] Atkinson, K. E. (1989). <em>An Introduction to Numerical Analysis</em> (2nd ed.).
+    John Wiley &amp; Sons.
+  </div>
+
+  <div class="ref-entry">
+    [4] Math.js Library. (2024). <em>Math.js – An extensive math library for JavaScript and Node.js</em>.
+    Retrieved from https://mathjs.org/
+  </div>
+
+  <div class="ref-entry">
+    [5] Plotly Technologies Inc. (2024). <em>Plotly JavaScript Open Source Graphing Library</em>.
+    Retrieved from https://plotly.com/javascript/
+  </div>
+
+  <div class="ref-entry">
+    [6] Press, W. H., Teukolsky, S. A., Vetterling, W. T., &amp; Flannery, B. P. (2007).
+    <em>Numerical Recipes: The Art of Scientific Computing</em> (3rd ed.). Cambridge University Press.
+  </div>
+
+  <div class="ref-entry">
+    [7] MathJax Consortium. (2024). <em>MathJax – Beautiful math in all browsers</em>.
+    Retrieved from https://www.mathjax.org/
+  </div>
+</div>
+
+</body>
+</html>

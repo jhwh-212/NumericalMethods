@@ -4,9 +4,7 @@
 
 const NM = {};
 
-/* =============================================
-   Natural Language → Math Expression Parser
-   ============================================= */
+//Natural Language → Math Expression Parser
 NM.parseNL = function(raw) {
   let s = raw.trim().toLowerCase();
 

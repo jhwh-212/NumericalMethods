@@ -25,7 +25,12 @@
   const errorMsg       = document.getElementById('errorMessage');
   const resultsCard    = document.getElementById('resultsCard');
   const graphCard      = document.getElementById('graphCard');
-  const generatePtsBtn = document.getElementById('generatePointsBtn');
+  const interpOrder    = document.getElementById('interpOrder');
+  const nlInputInterp      = document.getElementById('nlInputInterp');
+  const nlConvertBtnInterp = document.getElementById('nlConvertBtnInterp');
+  const nlPreviewBarInterp = document.getElementById('nlPreviewBarInterp');
+  const nlPreviewIconInterp= document.getElementById('nlPreviewIconInterp');
+  const nlPreviewTextInterp= document.getElementById('nlPreviewTextInterp');
   const exportPngBtn   = document.getElementById('exportPngBtn');
   const printResultBtn = document.getElementById('printResultBtn');
   const printBtn       = document.getElementById('printBtn');
@@ -43,7 +48,7 @@
   const intervalsHint  = document.getElementById('intervalsHint');
   const gaussOrderGroup= document.getElementById('gaussOrderGroup');
 
-  // ---- Method metadata ----
+  // ---- Methods ----
   const METHODS = {
     trapezoidal: {
       label: 'Trapezoidal Rule',
@@ -143,7 +148,7 @@
     } else {
       integInputs.style.display = 'none';
       interpInputs.style.display = 'block';
-      generateDataTable(+document.getElementById('numPoints').value || 4);
+      generateXFields(interpOrder.value);
     }
 
     // Reset results
@@ -161,27 +166,58 @@
     card.addEventListener('click', () => selectMethod(card.dataset.method));
   });
 
-  // ---- Generate interpolation table ----
-  function generateDataTable(n) {
-    n = Math.max(2, Math.min(15, +n || 4));
-    const wrapper = document.getElementById('dataPointsTable');
-    let html = '<table class="data-table"><thead><tr><th>#</th><th>x</th><th>y = f(x)</th></tr></thead><tbody>';
-    for (let i = 0; i < n; i++) {
-      html += `<tr>
-        <td>${i+1}</td>
-        <td><input type="number" step="any" class="pt-x" data-idx="${i}" placeholder="x${i+1}" /></td>
-        <td><input type="number" step="any" class="pt-y" data-idx="${i}" placeholder="y${i+1}" /></td>
-      </tr>`;
+  // ---- Generate x-input fields for interpolation ----
+  const ORD_NAMES = ['','1st','2nd','3rd','4th','5th','6th','7th'];
+
+  function generateXFields(order) {
+    order = +order;
+    const numPts = order + 1;
+    const wrapper = document.getElementById('xValuesWrapper');
+    document.getElementById('orderHint').textContent =
+      `${ORD_NAMES[order]} order needs ${numPts} data points — enter x₀ to x${numPts-1} below`;
+
+    let html = `<div class="x-fields-header"><span>i</span><span>xᵢ</span><span>yᵢ = f(xᵢ)</span></div>`;
+    for (let i = 0; i < numPts; i++) {
+      html += `<div class="x-field-row">
+        <span class="x-field-idx">x${i}</span>
+        <input type="number" step="any" class="x-point-input" data-idx="${i}"
+          placeholder="x${i}" id="xpt_${i}" />
+        <div class="y-computed-cell" id="ypt_${i}">—</div>
+      </div>`;
     }
-    html += '</tbody></table>';
     wrapper.innerHTML = html;
+
+    // Live y-computation as user types x values
+    wrapper.querySelectorAll('.x-point-input').forEach(inp => {
+      inp.addEventListener('input', () => recomputeY(inp));
+    });
   }
 
-  generatePtsBtn.addEventListener('click', () => {
-    const n = +document.getElementById('numPoints').value;
-    if (!n || n < 2 || n > 15) { showError('Number of points must be between 2 and 15.'); return; }
+  function recomputeY(xInput) {
+    const expr = document.getElementById('funcInputInterp').value.trim();
+    const idx  = xInput.dataset.idx;
+    const cell = document.getElementById('ypt_' + idx);
+    if (!expr || xInput.value === '') { cell.textContent = '—'; cell.className = 'y-computed-cell'; return; }
+    try {
+      const y = NM.evalFn(expr, +xInput.value);
+      cell.textContent = isNaN(y) ? 'invalid' : y.toPrecision(8);
+      cell.className = 'y-computed-cell ' + (isNaN(y) ? 'err' : 'ok');
+    } catch(e) {
+      cell.textContent = 'error'; cell.className = 'y-computed-cell err';
+    }
+  }
+
+  function recomputeAllY() {
+    document.querySelectorAll('.x-point-input').forEach(inp => recomputeY(inp));
+  }
+
+  // Recompute y whenever f(x) changes
+  document.getElementById('funcInputInterp').addEventListener('input', recomputeAllY);
+
+  // Order change → regenerate fields
+  interpOrder.addEventListener('change', () => {
+    generateXFields(interpOrder.value);
     hideError();
-    generateDataTable(n);
   });
 
   // ---- Collect inputs ----
@@ -196,16 +232,43 @@
   }
 
   function getInterpolationInputs() {
-    const xInputs = document.querySelectorAll('.pt-x');
-    const yInputs = document.querySelectorAll('.pt-y');
-    const xData = Array.from(xInputs).map(el => el.value);
-    const yData = Array.from(yInputs).map(el => el.value);
-    const xInterp = document.getElementById('interpX').value;
+    const expr  = document.getElementById('funcInputInterp').value.trim();
+    const order = +interpOrder.value;
+    const numPts = order + 1;
 
-    if (xData.some(v => v === '') || yData.some(v => v === '')) {
-      throw new Error('All x and y data point fields must be filled.');
-    }
-    return { xData: xData.map(Number), yData: yData.map(Number), xInterp };
+    if (!expr) throw new Error('Enter a function f(x) — or use Smart Input above.');
+
+    // Validate f(x) is evaluable
+    try { NM.evalFn(expr, 1); } catch(e) { throw new Error('Invalid function: ' + e.message); }
+
+    // Collect x values
+    const xInputs = document.querySelectorAll('.x-point-input');
+    if (xInputs.length !== numPts)
+      throw new Error(`Expected ${numPts} x values for ${ORD_NAMES[order]} order. Please reselect the order.`);
+
+    const xVals = Array.from(xInputs).map(el => el.value.trim());
+    const empty = xVals.findIndex(v => v === '');
+    if (empty !== -1)
+      throw new Error(`x${empty} is empty. Fill all ${numPts} x values (x₀ to x${numPts-1}).`);
+
+    const xData = xVals.map(Number);
+    if (xData.some(isNaN))
+      throw new Error('All x values must be valid numbers.');
+
+    // Check duplicates
+    if (new Set(xData).size !== xData.length)
+      throw new Error('Duplicate x values are not allowed — each xᵢ must be unique.');
+
+    // Auto-compute y = f(x) at each x
+    const yData = xData.map((x, i) => {
+      try { return NM.evalFn(expr, x); }
+      catch(e) { throw new Error(`Cannot evaluate f(x${i}) = f(${x}): ${e.message}`); }
+    });
+
+    const xInterpVal = document.getElementById('interpX').value.trim();
+    if (xInterpVal === '') throw new Error('Enter the interpolation point x*.');
+
+    return { xData, yData, xInterp: +xInterpVal };
   }
 
   // ---- Calculate ----
@@ -341,12 +404,16 @@
   function hideResults()   { resultsCard.style.display = 'none'; graphCard.style.display = 'none'; }
 
   clearBtn.addEventListener('click', () => {
-    document.getElementById('funcInput').value      = '';
-    document.getElementById('lowerBound').value     = '';
-    document.getElementById('upperBound').value     = '';
-    document.getElementById('numIntervals').value   = '8';
-    document.getElementById('interpX').value        = '';
-    document.querySelectorAll('.pt-x, .pt-y').forEach(el => el.value = '');
+    document.getElementById('funcInput').value       = '';
+    document.getElementById('funcInputInterp').value = '';
+    document.getElementById('lowerBound').value      = '';
+    document.getElementById('upperBound').value      = '';
+    document.getElementById('numIntervals').value    = '8';
+    document.getElementById('interpX').value         = '';
+    document.querySelectorAll('.x-point-input').forEach(el => { el.value = ''; });
+    document.querySelectorAll('.y-computed-cell').forEach(el => { el.textContent = '—'; el.className = 'y-computed-cell'; });
+    nlInput.value = '';  nlPreviewBar.style.display = 'none';
+    nlInputInterp.value = '';  nlPreviewBarInterp.style.display = 'none';
     hideError();
     hideResults();
   });
@@ -456,19 +523,70 @@
     }, 400);
   });
 
-  // Enter key converts
+  // Enter key converts (integration)
   nlInput.addEventListener('keydown', e => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); doConvert(); }
   });
 
   nlConvertBtn.addEventListener('click', doConvert);
 
-  // Example chips — fill textarea and auto-convert
-  document.querySelectorAll('.nl-chip').forEach(chip => {
-    chip.addEventListener('click', () => {
-      nlInput.value = chip.dataset.nl;
-      doConvert();
-    });
+  // Integration chips
+  document.querySelectorAll('.nl-chip:not(.interp-chip)').forEach(chip => {
+    chip.addEventListener('click', () => { nlInput.value = chip.dataset.nl; doConvert(); });
+  });
+
+  // ---- NL Converter for Interpolation ────────────────────────────────
+  const funcInputInterp = document.getElementById('funcInputInterp');
+
+  function doConvertInterp() {
+    const raw = nlInputInterp.value.trim();
+    if (!raw) return;
+
+    const { expr } = NM.parseNL(raw);  // bounds irrelevant for interpolation
+
+    let valid = false;
+    try { NM.evalFn(expr, 1); valid = true; } catch(e) {}
+
+    funcInputInterp.value = expr;
+    recomputeAllY();
+
+    nlPreviewBarInterp.style.display = 'flex';
+    nlPreviewBarInterp.className = 'nl-preview-bar ' + (valid ? 'ok' : 'err');
+    nlPreviewIconInterp.textContent = valid ? '✓' : '⚠';
+    nlPreviewTextInterp.textContent = valid
+      ? 'f(x) = ' + expr
+      : 'f(x) = ' + expr + '   — check your expression';
+
+    funcInputInterp.classList.add('field-flash');
+    setTimeout(() => funcInputInterp.classList.remove('field-flash'), 600);
+  }
+
+  nlConvertBtnInterp.addEventListener('click', doConvertInterp);
+
+  nlInputInterp.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); doConvertInterp(); }
+  });
+
+  // Live preview for interpolation NL (debounced)
+  let _debounceInterp;
+  nlInputInterp.addEventListener('input', () => {
+    clearTimeout(_debounceInterp);
+    _debounceInterp = setTimeout(() => {
+      const raw = nlInputInterp.value.trim();
+      if (!raw) { nlPreviewBarInterp.style.display = 'none'; return; }
+      const { expr } = NM.parseNL(raw);
+      let valid = false;
+      try { NM.evalFn(expr, 1); valid = true; } catch(e) {}
+      nlPreviewBarInterp.style.display = 'flex';
+      nlPreviewBarInterp.className = 'nl-preview-bar ' + (valid ? 'ok' : 'err');
+      nlPreviewIconInterp.textContent = valid ? '✓' : '⚠';
+      nlPreviewTextInterp.textContent = 'f(x) = ' + expr + (valid ? '' : '   — check expression');
+    }, 400);
+  });
+
+  // Interpolation chips
+  document.querySelectorAll('.interp-chip').forEach(chip => {
+    chip.addEventListener('click', () => { nlInputInterp.value = chip.dataset.nl; doConvertInterp(); });
   });
 
 })();

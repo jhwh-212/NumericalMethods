@@ -544,6 +544,86 @@ a { text-decoration: none; color: inherit; }
 
 #plotContainer { width: 100%; min-height: 420px; }
 
+/* =============================================
+   Interpolation X-Fields Grid
+   ============================================= */
+.hint-inline {
+  font-size: 0.76rem;
+  font-weight: 400;
+  color: var(--text-light);
+  margin-left: 6px;
+}
+
+.x-fields-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.x-fields-header {
+  display: grid;
+  grid-template-columns: 36px 1fr 1fr;
+  gap: 8px;
+  font-size: 0.73rem;
+  font-weight: 700;
+  color: var(--text-light);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  padding: 0 6px;
+}
+
+.x-field-row {
+  display: grid;
+  grid-template-columns: 36px 1fr 1fr;
+  gap: 8px;
+  align-items: center;
+}
+
+.x-field-idx {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  font-weight: 700;
+  text-align: center;
+  background: var(--primary-light);
+  color: var(--primary);
+  border-radius: 6px;
+  padding: 4px 0;
+}
+
+.x-point-input {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface2);
+  color: var(--text);
+  font-size: 0.9rem;
+  font-family: var(--font-mono);
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+.x-point-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(26,86,219,0.1);
+}
+
+.y-computed-cell {
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 9px 12px;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--text-light);
+  transition: all var(--transition);
+}
+.y-computed-cell.ok  { color: var(--success); border-color: rgba(16,185,129,0.3); background: rgba(16,185,129,0.05); font-weight: 600; }
+.y-computed-cell.err { color: var(--error);   border-color: rgba(239,68,68,0.3);  background: rgba(239,68,68,0.05); }
+
 /* f(x) input flash animation after smart convert */
 @keyframes fieldFlash {
   0%   { border-color: var(--success); box-shadow: 0 0 0 3px rgba(16,185,129,0.25); }

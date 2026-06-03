@@ -192,17 +192,71 @@
 
             <!-- Interpolation inputs -->
             <div id="interpolationInputs" class="input-group-set" style="display:none;">
-              <div class="input-group">
-                <label for="numPoints">Number of Data Points</label>
-                <div class="input-row-tight">
-                  <input type="number" id="numPoints" placeholder="4" min="2" max="15" value="4" />
-                  <button class="btn btn-secondary" id="generatePointsBtn">Generate Fields</button>
+
+              <!-- Smart NL Input (same design as integration) -->
+              <div class="nl-card" id="nlSectionInterp">
+                <div class="nl-card-header">
+                  <div class="nl-card-icon">✨</div>
+                  <div class="nl-card-title">
+                    <span class="nl-card-name">Smart Input</span>
+                    <span class="nl-card-sub">Describe your function in plain English</span>
+                  </div>
+                </div>
+                <div class="nl-input-wrap">
+                  <textarea id="nlInputInterp" class="nl-textarea" rows="2" spellcheck="false"
+                    placeholder="e.g.  x squared plus 2x minus 1&#10;e.g.  sin of x plus x&#10;e.g.  e to the x minus 1"></textarea>
+                  <button type="button" class="btn-convert" id="nlConvertBtnInterp">
+                    <span class="btn-convert-arrow">⟶</span>
+                    <span>Convert</span>
+                  </button>
+                </div>
+                <div class="nl-chips-row">
+                  <span class="nl-chips-label">Try:</span>
+                  <button class="nl-chip interp-chip" data-nl="x squared plus 2x minus 1">x²+2x−1</button>
+                  <button class="nl-chip interp-chip" data-nl="sin of x plus x">sin(x)+x</button>
+                  <button class="nl-chip interp-chip" data-nl="e to the x minus 1">eˣ−1</button>
+                  <button class="nl-chip interp-chip" data-nl="x cubed minus 3x plus 2">x³−3x+2</button>
+                  <button class="nl-chip interp-chip" data-nl="ln of x plus x squared">ln(x)+x²</button>
+                </div>
+                <div class="nl-preview-bar" id="nlPreviewBarInterp" style="display:none;">
+                  <span class="nl-preview-icon" id="nlPreviewIconInterp">✓</span>
+                  <span class="nl-preview-text" id="nlPreviewTextInterp"></span>
                 </div>
               </div>
-              <div id="dataPointsTable" class="data-table-wrapper"></div>
+
+              <!-- f(x) direct input -->
               <div class="input-group">
-                <label for="interpX">Interpolation Point (x)</label>
-                <input type="number" id="interpX" placeholder="2.5" step="any" />
+                <label for="funcInputInterp">f(x) — math expression</label>
+                <input type="text" id="funcInputInterp" placeholder="e.g. x^2 + 2*x - 1" autocomplete="off" spellcheck="false" />
+                <small class="hint">sin(x) &nbsp;cos(x) &nbsp;sqrt(x) &nbsp;exp(x) &nbsp;ln(x) &nbsp;x^2 &nbsp;pi &nbsp;e</small>
+              </div>
+
+              <!-- Order selector -->
+              <div class="input-group">
+                <label for="interpOrder">Interpolation Order</label>
+                <select id="interpOrder">
+                  <option value="1">1st Order — Linear &nbsp;(2 points: x₀, x₁)</option>
+                  <option value="2">2nd Order — Quadratic &nbsp;(3 points: x₀ to x₂)</option>
+                  <option value="3" selected>3rd Order — Cubic &nbsp;(4 points: x₀ to x₃)</option>
+                  <option value="4">4th Order — Quartic &nbsp;(5 points: x₀ to x₄)</option>
+                  <option value="5">5th Order — Quintic &nbsp;(6 points: x₀ to x₅)</option>
+                  <option value="6">6th Order &nbsp;(7 points: x₀ to x₆)</option>
+                  <option value="7">7th Order &nbsp;(8 points: x₀ to x₇)</option>
+                </select>
+                <small class="hint" id="orderHint">3rd order needs 4 data points — enter x₀ to x₃ below</small>
+              </div>
+
+              <!-- Auto-generated x fields -->
+              <div class="input-group">
+                <label>X Values <span class="hint-inline">— y = f(xᵢ) is computed automatically</span></label>
+                <div id="xValuesWrapper" class="x-fields-grid"></div>
+              </div>
+
+              <!-- Interpolation point -->
+              <div class="input-group">
+                <label for="interpX">Interpolation Point (x*)</label>
+                <input type="number" id="interpX" placeholder="e.g. 2.5" step="any" />
+                <small class="hint">Estimate f(x) at this value using the interpolating polynomial</small>
               </div>
             </div>
 

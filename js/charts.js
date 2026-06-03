@@ -180,9 +180,7 @@ Charts.drawInterpolation = function(data, containerId, title) {
   Plotly.newPlot(containerId, traces, Charts._layout(title), Charts._config);
 };
 
-/* =============================================
-   Export graph as PNG
-   ============================================= */
+//Export graph as PNG 
 Charts.exportPng = function(containerId) {
   Plotly.downloadImage(containerId, { format: 'png', width: 900, height: 500, filename: 'numerical-method-graph' });
 };
