@@ -8,140 +8,161 @@
 "Okay so, for this project I built a website — a calculator basically —
 that solves numerical methods problems. And not just gives you the answer,
 it actually shows you every single step, draws you a graph, and even lets
-you type the function in plain English instead of math notation."
+you type the function in plain English instead of math notation.
 
-"The website is live, anyone can open it right now from their phone or laptop —
-I'll show you in a second."
-
----
-
-### WHAT THE PROJECT IS
-
-"So the idea is simple. In this course we learned methods like Trapezoidal Rule,
-Simpson's, Richardson, Gauss-Legendre for integration — and Lagrange and Newton
-for interpolation. All of these have formulas you have to apply manually,
-and honestly it takes time and you can make mistakes."
-
-"So I thought — why not just build something that does it automatically,
-but still shows you the work so you can actually understand what's happening?"
+The website is live, anyone can open it right now from their phone or laptop.
+I'll show you."
 
 ---
 
-### LIVE DEMO — opening the site
+### WHAT THE PROJECT COVERS
 
-*(Open the website on screen)*
+"So the app covers six methods from this course:
 
-"So this is the homepage. You've got all six methods right here as cards.
-I click on one — let's say Trapezoidal Rule — and now I'm in the calculator."
+For integration: Trapezoidal Rule, Simpson's 1/3, Richardson Extrapolation, and Gauss-Legendre.
+For interpolation: Lagrange and Newton Divided Difference.
+
+All of them work the same way — you pick a method from the sidebar,
+fill in your inputs, hit Calculate, and you get the full solution with a graph."
 
 ---
 
-### THE SMART INPUT FEATURE
+### LIVE DEMO — Integration (Trapezoidal)
 
-"Now here's the part I like the most. You see this box at the top — Smart Input.
-Instead of figuring out how to type the function in math notation,
-you just... write it like you're talking."
+*(Open the website, click Trapezoidal Rule)*
 
-*(Type in the smart input box:)*
+"So this is the calculator. At the top you've got the Smart Input box —
+this is the main feature I want to show you first."
+
+*(Type in the smart input:)*
 **"integral from 0 to 4 of 2x pow2 plus 5x minus 10"**
 
-"I hit Convert — and look. It figured out that f(x) is 2x² + 5x − 10,
-it set a = 0, b = 4, automatically. I didn't type a single symbol."
+"I press Convert — and look. It read the plain English,
+figured out f(x) is 2x² + 5x − 10, and auto-filled a = 0, b = 4.
+I didn't type a single math symbol."
 
-"And it works with things like 'sin of x', 'e to the x', 'square root of x',
-'divided by', 'squared'... it reads it and converts it."
-
----
-
-### CALCULATING
+"It works with all kinds of input:
+'sin of x', 'e to the x', 'square root of x times cos of x',
+'2x pow3', '2**x' — it handles all of it."
 
 *(Click Calculate)*
 
-"Now I hit Calculate. And here's what you get:"
+"Now Calculate. And here's what you get:"
 
-"First — the formula. You can see the actual Trapezoidal formula rendered
-in proper math notation up here."
+"The formula at the top — rendered in proper LaTeX notation.
+Below that — every single step. h, the step size.
+A full table with x values, f(x) at each point, and the coefficients.
+Then the final calculation showing exactly how the answer was reached."
 
-"Then below that — every single step. It shows you h, the step size.
-It gives you a full table with all the x values, f(x) at each point,
-and the coefficient — whether it's 1 or 2. Then it shows you the final calculation."
+*(Scroll to graph)*
 
-"So you're not just getting a number. You're seeing exactly how the number was reached."
-
----
-
-### THE GRAPH
-
-"And then there's the graph. It plots the function, shades the trapezoids
-so you can actually see what the method is doing visually.
-You can zoom in, hover on points, see the values."
-
-"For interpolation it's different — it plots your data points, draws the polynomial
-curve through them, and highlights the interpolated point in green."
+"And then the graph — it plots the function and shades the actual trapezoids
+so you can SEE what the method is doing visually.
+You can zoom in, hover on any point, export it as PNG."
 
 ---
 
-### THE OTHER METHODS
+### LIVE DEMO — Interpolation (Lagrange or Newton)
 
-*(Quickly switch to Simpson's, then Lagrange)*
+*(Click Lagrange Interpolation in sidebar)*
 
-"Simpson's Rule works the same way — you put in your function and bounds,
-it shows the parabolic panels in the graph instead of trapezoids."
+"Now for interpolation — same idea.
+The Smart Input works here too.
+I type 'x squared plus 2x minus 1'..."
 
-"For Lagrange and Newton, instead of a function, you enter data points —
-x values and y values — and an interpolation point, and it builds the
-polynomial and tells you the estimated value at that point."
+*(Type in the interpolation smart input and convert)*
+
+"It fills f(x). Now I pick the order — let's say 3rd order, cubic.
+That means the app needs 4 data points: x₀, x₁, x₂, x₃."
+
+*(Enter x values: 0, 1, 2, 3)*
+
+"I enter my x values — and watch the y column.
+It computes y = f(xᵢ) automatically for each one.
+x₀ = 0 → y₀ = −1, x₁ = 1 → y₁ = 2, x₂ = 2 → y₂ = 7, x₃ = 3 → y₃ = 14.
+No manual calculation needed."
+
+"I put the interpolation point — say x* = 1.5 — and hit Calculate."
+
+*(Click Calculate)*
+
+"It builds the Lagrange polynomial, shows the basis polynomials L₀, L₁, L₂, L₃,
+evaluates P(1.5), gives me the answer, and plots the polynomial curve
+through all the data points with the interpolated point highlighted in green."
 
 ---
 
-### HOW IT'S BUILT (Part 2 of the project)
+### VALIDATION
 
-"So technically — the whole thing is HTML, CSS, and JavaScript. No framework,
-no backend. Pure front-end."
+"The app also validates everything.
+If I pick 5th order but only give 4 x values — it tells me exactly what's missing.
+If I put duplicate x values — it catches that too.
+If the function I typed doesn't make sense — it shows a red warning immediately."
 
-"The math is all in one file called methods.js. Each method is its own function.
-For example for the Trapezoidal Rule, it takes the expression, bounds a and b,
-and n — computes h, evaluates f(x) at every point using a library called Math.js,
-then applies the formula. That's it."
+---
 
-"The graphs are Plotly.js. The formulas you see rendered in LaTeX are MathJax."
+### HOW IT'S BUILT
 
-"And the Smart Input — that's my own parser I wrote. It reads the plain English,
-replaces words like 'plus' with '+', 'squared' with '^2', 'sin of' with 'sin(',
-and cleans it up into a valid math expression."
+"Technically — pure HTML, CSS, and JavaScript. No framework, no backend.
+
+The math is all in methods.js. Each method has its own function.
+The graphs are Plotly.js. The formulas are rendered with MathJax.
+
+The Smart Input — that's a custom parser I wrote.
+It reads the plain English, replaces words like 'plus' with '+',
+'squared' with '^2', 'sin of' with 'sin(', 'pow2' with '^2',
+and cleans it up into a valid math expression.
+
+The same parser works for both integration and interpolation —
+for integration it also extracts bounds from 'from X to Y',
+for interpolation it just fills the f(x) field and the user enters x values."
 
 ---
 
 ### CLOSING
 
-"So to wrap it up — the project covers all six methods from the course,
-shows step-by-step solutions, gives you interactive graphs,
-works on mobile, has dark mode, and you can export the graph or print the solution."
+"So to wrap it up — six methods, step-by-step solutions, interactive graphs,
+smart plain-English input, order selection for interpolation,
+auto-computed y values, dark mode, mobile responsive, and it's live online.
 
-"The code is all on GitHub, the live site is up and running,
-and honestly I think it's actually useful — not just for this course
-but for anyone studying numerical methods."
+The code and documentation are all on GitHub.
 
-"That's it. Any questions?"
+That's it. Any questions?"
 
 ---
 
-### IF THEY ASK ABOUT THE MATH
-
-**"How does the Trapezoidal Rule work?"**
-"You split the area under the curve into trapezoids — equal width strips.
-You calculate the area of each trapezoid and add them up.
-More strips means more accurate. That's basically it."
+### QUICK ANSWERS IF ASKED
 
 **"What's the difference between Lagrange and Newton?"**
-"They give you the same polynomial — same answer — but they get there differently.
-Lagrange is more explicit, you compute basis polynomials for each point.
-Newton uses a difference table and is easier to update if you add more data points."
+"Same polynomial, different algorithm. Lagrange computes basis polynomials for each point.
+Newton uses a divided difference table — easier to update if you add more data points.
+Both give the same answer."
+
+**"Why does the order matter for interpolation?"**
+"The order is the degree of the polynomial. 1st order is a straight line through 2 points.
+2nd order is a parabola through 3 points. 3rd order is cubic through 4 points.
+Higher order = more accurate fit but needs more data points.
+For nth order you need exactly n+1 points."
+
+**"How does it compute y automatically?"**
+"Once you enter f(x) and type an x value, the app calls math.js in the background —
+same library that evaluates f(x) for the integration methods.
+It runs f(x) = expression at that specific x and shows the result instantly."
+
+**"What's the difference between Trapezoidal and Simpson's?"**
+"Trapezoidal connects points with straight lines — simple but less accurate.
+Simpson's fits a parabola through every two panels — more accurate for the same n.
+Richardson takes two trapezoidal estimates at different step sizes and combines them
+to get even higher accuracy with no extra work."
 
 **"Why did you use JavaScript instead of Python?"**
-"Because JavaScript runs in the browser — no installation needed, no server,
-anyone can just open the link and use it. Python would need a backend
-or someone to install libraries. This way it's just a link."
+"JavaScript runs directly in the browser — no installation, no server needed.
+Anyone clicks the link and it works. Python would need a backend or the user
+to have Python installed. This way it's just a URL."
+
+**"How did you put it live?"**
+"GitHub Pages. Four commands — init, commit, push, then enable Pages in GitHub settings.
+GitHub hosts static files for free and gives you a public URL."
 
 ---
-*Total speaking time: approximately 5–7 minutes*
+*Total speaking time: approximately 6–8 minutes with demo*

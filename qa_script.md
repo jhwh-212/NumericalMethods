@@ -7,111 +7,121 @@
 
 "So the app is split into files — each one has one job.
 
-The INPUT is taken here — in app.js, this function called getIntegrationInputs:"
+For integration, input is collected here in app.js:"
 
 ```js
-// app.js — line 188
+// app.js — getIntegrationInputs()
 function getIntegrationInputs() {
   return {
-    expr: document.getElementById('funcInput').value.trim(),  // the function user typed
-    a:    document.getElementById('lowerBound').value,        // lower bound
-    b:    document.getElementById('upperBound').value,        // upper bound
-    n:    document.getElementById('numIntervals').value || 8  // number of intervals
+    expr: document.getElementById('funcInput').value.trim(),   // function f(x)
+    a:    document.getElementById('lowerBound').value,         // lower bound
+    b:    document.getElementById('upperBound').value,         // upper bound
+    n:    document.getElementById('numIntervals').value || 8   // intervals
   };
 }
 ```
 
-"It just reads the form fields. Nothing fancy.
-Then when the user clicks Calculate, this runs in the same file:"
+"For interpolation, it's different now — the user enters f(x) and x values,
+and the app auto-computes the y values. Here's that function:"
 
 ```js
-// app.js — line 228
+// app.js — getInterpolationInputs()
+function getInterpolationInputs() {
+  const expr  = document.getElementById('funcInputInterp').value.trim();
+  const order = +interpOrder.value;
+  const numPts = order + 1;  // nth order needs n+1 points
+
+  const xData = [...document.querySelectorAll('.x-point-input')]
+                  .map(el => Number(el.value));
+
+  // Auto-compute y = f(x) at each x — no manual y entry needed
+  const yData = xData.map(x => NM.evalFn(expr, x));
+
+  return { xData, yData, xInterp: +document.getElementById('interpX').value };
+}
+```
+
+"Then when Calculate is clicked, app.js passes everything to methods.js:"
+
+```js
+// app.js — calculate()
 if (currentMethod === 'trapezoidal') {
-    data = NM.trapezoidal({ expr: inp.expr, a: inp.a, b: inp.b, n: inp.n });
+    data = NM.trapezoidal({ expr, a, b, n });
+} else if (currentMethod === 'lagrange') {
+    data = NM.lagrange({ xData, yData, xInterp });
+} else if (currentMethod === 'newton') {
+    data = NM.newton({ xData, yData, xInterp });
 }
 ```
 
-"It passes everything to methods.js — and THAT's where the actual formula runs:"
+"And that's where the actual math formula runs. For Trapezoidal for example:"
 
 ```js
-// methods.js — line 122
-NM.trapezoidal = function({ expr, a, b, n }) {
-
-  const h  = (b - a) / n;                                    // step size
-  const xs = Array.from({ length: n+1 }, (_, i) => a + i*h);// all x points
-  const ys = xs.map(x => NM.evalFn(expr, x));               // evaluate f(x)
-
-  const sum    = ys[0] + ys[n] + 2 * ys.slice(1,n).reduce((s,v) => s+v, 0);
-  const result = (h / 2) * sum;   // <-- THIS is the Trapezoidal formula
-
-  return { result, steps, xs, ys };
-}
+// methods.js — NM.trapezoidal()
+const h      = (b - a) / n;
+const xs     = Array.from({ length: n+1 }, (_, i) => a + i*h);
+const ys     = xs.map(x => NM.evalFn(expr, x));   // evaluate f(x) at each point
+const sum    = ys[0] + ys[n] + 2 * ys.slice(1,n).reduce((s,v) => s+v, 0);
+const result = (h / 2) * sum;   // ← the actual Trapezoidal formula
 ```
 
-"So for example if I type f(x) = x² + 1, a = 0, b = 4, n = 4:
-- h = (4-0)/4 = 1
-- x points: 0, 1, 2, 3, 4
-- f(x) at each: 1, 2, 5, 10, 17
-- result = (1/2) × [1 + 2(2+5+10) + 17] = (0.5) × 52 = 26
-
-That's the whole thing."
+"So for f(x) = x² + 1, a=0, b=4, n=4:
+h=1, points: 0,1,2,3,4, f(x): 1,2,5,10,17
+result = (1/2) × [1 + 2(2+5+10) + 17] = 26."
 
 ---
 
 ## Q2: "How does it know 'integral' in plain English means do an integral?"
 
-"It doesn't — and that's the honest answer.
+"It doesn't. That's the honest answer.
 
-The word 'integral' in the text only does one thing in the code.
+The word 'integral' in the smart input only sets a flag — true or false.
 Look at methods.js line 16:"
 
 ```js
 // methods.js — line 16
 const hasIntegral = /\bintegral\b/.test(s);
-//                  checks if the word "integral" exists → true or false
-//                  does ZERO math
+// true  if user wrote "integral from 0 to 4 of sin x"
+// false if user wrote "sin of x"
+// does ZERO math either way
 ```
 
-"That's it. Just a true/false check. Nothing about formulas.
-
-The actual math — Trapezoidal, Simpson's, whatever —
-is decided here in app.js when the user clicks the sidebar:"
+"The actual math — Trapezoidal, Simpson's, Lagrange, whatever —
+is decided by which method the user clicked in the sidebar.
+That sets this variable in app.js:"
 
 ```js
-// app.js — line 228
-if (currentMethod === 'trapezoidal') {
-    data = NM.trapezoidal(...);   // runs Trapezoidal formula
-} else if (currentMethod === 'simpson') {
-    data = NM.simpson(...);       // runs Simpson's formula
-}
+// app.js — selectMethod()
+currentMethod = 'trapezoidal';   // set when user clicks sidebar
 ```
 
-"currentMethod is set the moment you click 'Trapezoidal Rule' in the sidebar.
-Not when you type 'integral'. The word just tells the app: hey, bounds are required."
+"Then Calculate uses that to decide which formula to run.
+The word 'integral' in the text just tells the app: bounds are required.
+That's its only job."
 
 ---
 
 ## Q3: "So when there are bounds it does the integral math?"
 
-"No — bounds are just numbers. They don't trigger anything.
+"No — bounds are just two numbers. They don't trigger anything on their own.
 
-Look at the Trapezoidal function — bounds a and b are just plugged in here:"
+Look — in the Trapezoidal function, a and b are just plugged into the formula:"
 
 ```js
-// methods.js — line 129
-const h  = (b - a) / n;   // b and a are just numbers in a formula
+// methods.js — NM.trapezoidal()
+const h  = (b - a) / n;                              // b and a are just numbers
 const xs = Array.from({ length: n+1 }, (_, i) => a + i*h);
 ```
 
-"If you put a = 0 and b = 4 in a box and never click Calculate,
-nothing happens. The math only runs when Calculate is clicked —
-and even then, it's the sidebar selection that decides WHAT formula runs.
+"If you fill in a=0 and b=4 and never click Calculate — nothing happens.
+The trigger is always the Calculate button.
+And even then, it's the sidebar that decided which formula runs.
 
-So:
-- Sidebar → decides which formula (Trapezoidal, Simpson's...)
-- f(x), a, b, n → the numbers fed INTO that formula
-- Calculate button → the trigger that actually runs everything
-- Bounds alone → just two numbers sitting in boxes"
+So to be clear:
+- Sidebar click → decides WHICH formula
+- f(x), a, b, n → inputs fed INTO that formula
+- Calculate button → actually runs the math
+- Bounds alone → just numbers sitting in boxes"
 
 ---
 
@@ -119,97 +129,150 @@ So:
 And where does it check 'integral' for the bounds?"
 
 "Both happen in methods.js in the parseNL function.
-Let me show you the key parts:
+Same function is used for BOTH integration and interpolation — shared code.
 
-First — line 16 — the integral check:"
+Line 16 — the integral check:"
 
 ```js
 // methods.js — line 16
 const hasIntegral = /\bintegral\b/.test(s);
-// if user typed "integral from 0 to 4 of sin x" → hasIntegral = true
-// if user typed "sin of x" → hasIntegral = false
+// "integral from 0 to 4 of sin x" → hasIntegral = true
+// "sin of x" → hasIntegral = false
+// "x squared plus 2x" → hasIntegral = false (interpolation case)
 ```
 
-"Second — line 20 — extract the bounds from 'from X to Y':"
+"Line 20 — extract bounds from 'from X to Y' (only relevant for integration):"
 
 ```js
 // methods.js — line 20
 const bm = s.match(/\bfrom\s+([-+]?[\d.]+|pi|e|tau)\s+to\s+([-+]?[\d.]+|pi|e|tau)\b/);
 if (bm) { a = bm[1]; b = bm[2]; }
-// "from 0 to 4" → a = "0", b = "4"
+// "from 0 to 4"  → a = "0", b = "4"
 // "from 0 to pi" → a = "0", b = "pi"
+// for interpolation this is just ignored
 ```
 
-"Third — lines 29 to 51 — the phrase replacement list.
-It goes through every phrase one by one and swaps it:"
+"Lines 29 to 51 — the phrase replacement table:"
 
 ```js
-// methods.js — line 29
+// methods.js — PHRASES table
 const PHRASES = [
-  ['e to the power of',  'exp('],  // "e to the power of x" → "exp(x"
-  ['square root of',     'sqrt('], // "square root of x"    → "sqrt(x"
-  ['sin of',             'sin('],  // "sin of x"            → "sin(x"
-  ['multiplied by',      '*'],     // "x multiplied by 2"   → "x*2"
-  ['divided by',         '/'],     // ...
-  // ... and so on
+  ['e to the power of',  'exp('],   // "e to the power of x" → "exp(x"
+  ['square root of',     'sqrt('],  // "square root of x"    → "sqrt(x"
+  ['sin of',             'sin('],   // "sin of x"            → "sin(x"
+  ['multiplied by',      '*'],      // "x multiplied by 2"   → "x*2"
+  ['divided by',         '/'],
+  // ... and so on (longest phrases first)
 ];
 for (const [from, to] of PHRASES) {
   while (s.includes(from)) s = s.split(from).join(to);
 }
 ```
 
-"Then line 67 handles power words:"
+"Line 67 handles power words — including variable exponents now:"
 
 ```js
-// methods.js — line 67
+// methods.js — RX table
 [/pow(?:er)?\s*([a-z0-9.]+)/g, '^$1']
-// "pow2"  → "^2"
-// "powx"  → "^x"
-// "pow 3" → "^3"
+// "pow2" → "^2",  "powx" → "^x",  "pow 3" → "^3",  "power x" → "^x"
 ```
 
-"Then line 81 fixes implicit multiplication:"
+"Line 81 — implicit multiplication:"
 
 ```js
-// methods.js — line 81
 s = s.replace(/(\d)x(?!\w)/g, '$1*x');  // "2x" → "2*x"
 s = s.replace(/(\d)\s*\(/g,   '$1*(');  // "2(" → "2*("
 ```
 
-"At the end it returns expr, a, b, and hasIntegral.
-
-Then in app.js the doConvert function uses all of that:"
+"For INTEGRATION — app.js doConvert() uses hasIntegral to decide bounds:"
 
 ```js
-// app.js — line 392
+// app.js — doConvert()
 if (a !== '' && b !== '') {
-  // bounds found in text → fill them in the form
-  lowerEl.value = a;
+  lowerEl.value = a;   // bounds detected in text → fill them
   upperEl.value = b;
-
 } else if (!hasIntegral) {
-  // no "integral" word + no bounds → silently default to 0 and 1
-  lowerEl.value = '0';
+  lowerEl.value = '0'; // no "integral", no bounds → default 0 and 1
   upperEl.value = '1';
 }
-// if hasIntegral=true but no bounds → warn the user
+// if hasIntegral but no bounds → warn the user
 ```
 
-"So the full flow for 'integral from 0 to 4 of 2x pow2 plus 5x' is:
-1. hasIntegral = true
-2. a = 0, b = 4 extracted
-3. '2x pow2' → '2*x^2'
-4. 'plus' → '+'
-5. '5x' → '5*x'
-6. result: f(x) = 2*x^2+5*x, a=0, b=4"
+"For INTERPOLATION — app.js doConvertInterp() only fills f(x), ignores bounds:"
+
+```js
+// app.js — doConvertInterp()
+function doConvertInterp() {
+  const { expr } = NM.parseNL(raw);   // same parser, but ignore a, b
+  funcInputInterp.value = expr;        // just fill the function field
+  recomputeAllY();                     // re-run f(x) for all x values
+}
+```
 
 ---
 
-## Q5: "How did you put the website live?"
+## Q5: "How does the order selector work? And how does it auto-compute y?"
 
-"Four commands basically.
+"When the user changes the order dropdown, this runs:"
 
-Step 1 — turned the folder into a git repo and saved all the files:"
+```js
+// app.js — interpOrder change listener
+interpOrder.addEventListener('change', () => {
+  generateXFields(interpOrder.value);
+});
+```
+
+"generateXFields takes the order n and creates n+1 input rows:"
+
+```js
+// app.js — generateXFields(order)
+function generateXFields(order) {
+  const numPts = order + 1;  // 3rd order → 4 points
+  // builds x₀, x₁, x₂, x₃ input fields dynamically
+  // each field gets a listener that calls recomputeY when changed
+}
+```
+
+"recomputeY — this is the live auto-compute. Runs every time user types an x value:"
+
+```js
+// app.js — recomputeY(xInput)
+function recomputeY(xInput) {
+  const expr = document.getElementById('funcInputInterp').value.trim();
+  const y    = NM.evalFn(expr, +xInput.value);  // calls math.js
+  document.getElementById('ypt_' + idx).textContent = y.toPrecision(8);
+}
+```
+
+"So if f(x) = x² + 2x − 1 and I type x₀ = 2 — it immediately shows y₀ = 7.
+No manual calculation. Math.js evaluates x²+2x−1 at x=2 in real time."
+
+"The validation in getInterpolationInputs checks:
+- Is f(x) filled and valid?
+- Does the number of x inputs match the selected order?
+- Are all x fields filled?
+- Any duplicate x values?"
+
+```js
+// app.js — getInterpolationInputs() validation
+if (xInputs.length !== numPts)
+  throw new Error(`Expected ${numPts} x values for ${order}th order.`);
+
+const empty = xVals.findIndex(v => v === '');
+if (empty !== -1)
+  throw new Error(`x${empty} is empty. Fill all ${numPts} x values.`);
+
+if (new Set(xData).size !== xData.length)
+  throw new Error('Duplicate x values are not allowed.');
+```
+
+---
+
+## Q6: "How did you put the website live?"
+
+"Four steps.
+
+Step 1 — turned the folder into a git repo:"
 
 ```bash
 git init
@@ -217,9 +280,9 @@ git add .
 git commit -m "Initial commit"
 ```
 
-"Step 2 — created an empty repo on GitHub called NumericalMethods.
+"Step 2 — created empty repo on GitHub called NumericalMethods.
 
-Step 3 — connected the local folder to GitHub and pushed the files:"
+Step 3 — connected and pushed:"
 
 ```bash
 git remote add origin https://github.com/jhwh-212/NumericalMethods.git
@@ -227,21 +290,20 @@ git branch -M main
 git push -u origin main
 ```
 
-"Step 4 — in GitHub settings → Pages → set branch to main → Save.
-GitHub gave us the URL automatically:
-https://jhwh-212.github.io/NumericalMethods/
+"Step 4 — GitHub settings → Pages → branch: main → Save.
+Got the URL: https://jhwh-212.github.io/NumericalMethods/
 
-And it works without a server because everything is HTML, CSS, JavaScript —
-static files. GitHub hosts those for free.
-Every update after that is just:"
+Works without a server because it's all static files — HTML, CSS, JavaScript.
+GitHub hosts those for free. Every update after is just:"
 
 ```bash
 git add .
-git commit -m "what I changed"
+git commit -m "description"
 git push origin main
 ```
 
-"Site updates in about a minute."
+"Live within a minute."
 
 ---
-*Point to the actual file and line on screen when you say each code block*
+*Point to the file and highlight the code block when you say each answer*
+*Q5 is new — expect it since the order selector is a visible feature*
